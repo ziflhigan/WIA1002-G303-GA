@@ -2,17 +2,21 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MapDecipher {
     private final int width = 10, height = 20;
-    private int[][] mapPiece1, mapPiece2, mapPiece3, mapPiece4, completeMap;
-    private static final String[] DIR_NAMES = {"Up", "Down", "Left", "Right"};
+    private int[][] mapPiece1;
+    private int[][] mapPiece2;
+    private int[][] mapPiece3;
+    private int[][] mapPiece4;
 
     /*
      * {0, 1}, {1, 0}, {0, -1}, {-1, 0}
      * move down, move right, move up, move left
      */
-    private final int[][] DIRECTIONS = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    private final int[][] DIRECTIONS = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
     /**
      * @param imagePath the path of the image where we stored in local
@@ -76,7 +80,7 @@ public class MapDecipher {
      */
     public int recursiveDFS(int[][] mP, int currentX, int currentY, int visitedStations, boolean[][] visited) {
         if (currentX < 0 || currentX >= mP[0].length || currentY < 0 || currentY >= mP.length
-                || mP[currentY][currentX] == 1)
+                || mP[currentY][currentX] == 1 || visitedStations > 3)
             return 0;
 
         if (visited[currentY][currentX])
@@ -119,14 +123,38 @@ public class MapDecipher {
      * It also changes the 'final destinations' to 'obstacles' as per required
      */
     public int[][] completeMap() {
-        int[][] copyMapPiece1 = mapPiece1, copyMapPiece2 = mapPiece2,
-                copyMapPiece3 = mapPiece3, copyMapPiece4 = mapPiece4;
+        int[][] copyMapPiece1 = new int[20][10], copyMapPiece2 = new int[20][10],
+                copyMapPiece3 = new int[20][10], copyMapPiece4 = new int[20][10];
+
+        for (int i = 0; i < 20; i++){
+            for (int j = 0; j < 10 ; j++){
+                copyMapPiece1[i][j] = mapPiece1[i][j];
+            }
+        }
+
+        for (int i = 0; i < 20; i++){
+            for (int j = 0; j < 10 ; j++){
+                copyMapPiece1[i][j] = mapPiece2[i][j];
+            }
+        }
+
+        for (int i = 0; i < 20; i++){
+            for (int j = 0; j < 10 ; j++){
+                copyMapPiece1[i][j] = mapPiece3[i][j];
+            }
+        }
+
+        for (int i = 0; i < 20; i++){
+            for (int j = 0; j < 10 ; j++){
+                copyMapPiece1[i][j] = mapPiece4[i][j];
+            }
+        }
 
         copyMapPiece1[19][9] = 1;
         copyMapPiece2[19][9] = 1;
         copyMapPiece3[19][9] = 1;
 
-        completeMap = new int[40][20];
+        int[][] completeMap = new int[40][20];
 
         for (int i = 0; i < 20; i++) {
             for (int j = 0; j < 10; j++) {
@@ -169,6 +197,64 @@ public class MapDecipher {
 
     public int[][] getMapPiece4() {
         return mapPiece4;
+    }
+
+    public int countPaths2(int[][] mapPiece) {
+        Queue<int[]> queue = new LinkedList<>();
+        boolean[][] startVisited = new boolean[mapPiece.length][mapPiece[0].length];
+        startVisited[0][0] = true;
+        queue.offer(new int[]{0, 0, 0, 0}); // starting node: x, y, visitedStations, visited[][] index
+
+        List<boolean[][]> visitedList = new ArrayList<>();
+        visitedList.add(startVisited);
+
+        int pathCount = 0;
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int currentX = current[0];
+            int currentY = current[1];
+            int visitedStations = current[2];
+            int visitedIndex = current[3];
+            boolean[][] currentVisited = visitedList.get(visitedIndex);
+
+            if (mapPiece[currentY][currentX] == 3 && visitedStations == 3) {
+                pathCount++;
+                continue;
+            }
+
+            for (int[] direction : DIRECTIONS) {
+                int newX = currentX + direction[0];
+                int newY = currentY + direction[1];
+
+                if (newX < 0 || newX >= mapPiece[0].length || newY < 0 || newY >= mapPiece.length
+                        || mapPiece[newY][newX] == 1 || currentVisited[newY][newX])
+                    continue;
+
+                int newVisitedStations = visitedStations;
+                if (mapPiece[newY][newX] == 2 && visitedStations < 3) {
+                    newVisitedStations++;
+                } else if (mapPiece[newY][newX] == 2) {
+                    continue; // Skip visiting the station cell if the number of visited stations is already 3
+                }
+
+                // Skip visiting the destination cell if the number of visited stations is less than 3
+                if (mapPiece[newY][newX] == 3 && newVisitedStations < 3)
+                    continue;
+
+                // Create a new visited array for the next level
+                boolean[][] newVisited = new boolean[mapPiece.length][mapPiece[0].length];
+                for (int i = 0; i < mapPiece.length; i++) {
+                    System.arraycopy(currentVisited[i], 0, newVisited[i], 0, mapPiece[0].length);
+                }
+                newVisited[newY][newX] = true;
+
+                // Add the new visited array to the list and enqueue the new position with the new visited array's index
+                visitedList.add(newVisited);
+                int newVisitedIndex = visitedList.size() - 1;
+                queue.offer(new int[]{newX, newY, newVisitedStations, newVisitedIndex});
+            }
+        }
+        return pathCount;
     }
 
 }
