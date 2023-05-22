@@ -13,20 +13,22 @@ public class ImageInput {
         System.out.println("\nMap Piece 4:");
         map.display2DArray(map.getMapPiece4());
 
-
-        int pathsMapPiece1 = map.countPaths(map.getMapPiece1());
-        int pathsMapPiece2 = map.countPaths(map.getMapPiece2());
-        int pathsMapPiece3 = map.countPaths(map.getMapPiece3());
-        int pathsMapPiece4 = map.countPaths(map.getMapPiece4());
+        int pathsMapPiece1 = map.countPathsBFS(map.getMapPiece1());
+        int pathsMapPiece2 = map.countPathsBFS(map.getMapPiece2());
+        int pathsMapPiece3 = map.countPathsBFS(map.getMapPiece3());
+        int pathsMapPiece4 = map.countPathsBFS(map.getMapPiece4());
 
         System.out.println("Number of paths for Map Piece 1: " + pathsMapPiece1);
         System.out.println("Number of paths for Map Piece 2: " + pathsMapPiece2);
         System.out.println("Number of paths for Map Piece 3: " + pathsMapPiece3);
         System.out.println("Number of paths for Map Piece 4: " + pathsMapPiece4);
 
-        //System.out.println("\nComplete nap:");
+        System.out.println("\nComplete nap:");
+        map.display2DArray(map.completeMap());
 
-        int h = map.countPaths2(map.getMapPiece2());
-        System.out.println(h);
+        int nComp = map.countPaths(map.completeMap());
+        System.out.println("The number of possible paths for the complete map while passing through exactly 4 stations: " + nComp);
     }
+
+
 }

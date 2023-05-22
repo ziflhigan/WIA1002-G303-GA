@@ -81,13 +81,22 @@ public class MapVisualizer {
         MapDecipher comMap = new MapDecipher();
         comMap.imageInputAndConvert();
 
-        List<List<String>> allShortestPaths = AStarAllPaths.findAllShortestPaths(comMap.completeMap());
+        List<List<String>> allShortestPaths = BFSAllShortestPaths.findAllShortestPaths(comMap.completeMap());
+
+        System.out.println("The minimum steps required for a shortest path is : " + allShortestPaths.get(0).size());
+        System.out.println("There are total " + allShortestPaths.size() + " possible shortest paths");
+        System.out.println("All possible shortest paths:");
+        for (List<String> path : allShortestPaths) {
+            System.out.println(path);
+        }
 
         JFrame frame = new JFrame("Map Visualizer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 1000);
+        frame.setSize(450, 850);
         frame.setLocationRelativeTo(null);
         frame.setContentPane(new MapPanel(comMap.completeMap(), allShortestPaths));
         frame.setVisible(true);
+
+        System.out.println(allShortestPaths.size());
     }
 }

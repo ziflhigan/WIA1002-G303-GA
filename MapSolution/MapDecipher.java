@@ -3,7 +3,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MapDecipher {
     private final int width = 10, height = 20;
@@ -16,7 +15,7 @@ public class MapDecipher {
      * {0, 1}, {1, 0}, {0, -1}, {-1, 0}
      * move down, move right, move up, move left
      */
-    private final int[][] DIRECTIONS = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private final int[][] Directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
     /**
      * @param imagePath the path of the image where we stored in local
@@ -76,11 +75,11 @@ public class MapDecipher {
      * @return 0 or 1
      * It checks for the base conditions (out of bounds, obstacles, or previously visited cells)
      * and returns 0 if any of them is true. If it reaches a station, it increments the "visitedCounter" counter.
-     * If it reaches exactly 3 stations, it returns 1, indicating a valid path.
+     * If it reaches exactly 4 stations, it returns 1, indicating a valid path.
      */
     public int recursiveDFS(int[][] mP, int currentX, int currentY, int visitedStations, boolean[][] visited) {
         if (currentX < 0 || currentX >= mP[0].length || currentY < 0 || currentY >= mP.length
-                || mP[currentY][currentX] == 1 || visitedStations > 3)
+                || mP[currentY][currentX] == 1 || visitedStations > 4)
             return 0;
 
         if (visited[currentY][currentX])
@@ -89,13 +88,13 @@ public class MapDecipher {
         if (mP[currentY][currentX] == 2)
             visitedStations++;
 
-        if (visitedStations == 3 && mP[currentY][currentX] == 3)
+        if (visitedStations == 4 && mP[currentY][currentX] == 3)
             return 1;
 
         visited[currentY][currentX] = true;
         int pathCount = 0;
 
-        for (int[] direction : DIRECTIONS) {
+        for (int[] direction : Directions) {
             int newX = currentX + direction[0];
             int newY = currentY + direction[1];
             pathCount += recursiveDFS(mP, newX, newY, visitedStations, visited);
@@ -134,19 +133,19 @@ public class MapDecipher {
 
         for (int i = 0; i < 20; i++){
             for (int j = 0; j < 10 ; j++){
-                copyMapPiece1[i][j] = mapPiece2[i][j];
+                copyMapPiece2[i][j] = mapPiece2[i][j];
             }
         }
 
         for (int i = 0; i < 20; i++){
             for (int j = 0; j < 10 ; j++){
-                copyMapPiece1[i][j] = mapPiece3[i][j];
+                copyMapPiece3[i][j] = mapPiece3[i][j];
             }
         }
 
         for (int i = 0; i < 20; i++){
             for (int j = 0; j < 10 ; j++){
-                copyMapPiece1[i][j] = mapPiece4[i][j];
+                copyMapPiece4[i][j] = mapPiece4[i][j];
             }
         }
 
@@ -199,7 +198,17 @@ public class MapDecipher {
         return mapPiece4;
     }
 
-    public int countPaths2(int[][] mapPiece) {
+    /**
+     * This method uses breadth first search, which searches the path level by level,
+     * it has a queue that stores a sequence of integers containing the coordinates, number of visited stations,
+     * and the index of visited nodes in the visitedList
+     * it has a 2D array startVisited that stores boolean value whether the particular node has been visited or not.
+     * it also has an array list named visitedList that stores the visited 2D arrays, because for each possible direction it has a unique 'startVisited' array.
+     *
+     * @param mapPiece the map piece
+     * @return the number of possible paths found
+     */
+    public int countPathsBFS(int[][] mapPiece) {
         Queue<int[]> queue = new LinkedList<>();
         boolean[][] startVisited = new boolean[mapPiece.length][mapPiece[0].length];
         startVisited[0][0] = true;
@@ -222,7 +231,7 @@ public class MapDecipher {
                 continue;
             }
 
-            for (int[] direction : DIRECTIONS) {
+            for (int[] direction : Directions) {
                 int newX = currentX + direction[0];
                 int newY = currentY + direction[1];
 
