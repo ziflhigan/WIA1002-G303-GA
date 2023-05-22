@@ -4,6 +4,7 @@
  */
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class TicTacToeRegular{
 
@@ -15,47 +16,55 @@ public class TicTacToeRegular{
     private static int round =1;
     private static int playermark =0;
     private static int enginemark =0;
+    private static Stack<Integer> historyMoveRow, historyMoveCol;
 
-
-    public void playgame(){
+    public boolean playgame(){
         printInstructions();
         char currentPlayer = player;
-        while (round <4){
-            initializeBoard();
-            numMoves=0;
-            System.out.println("\nRound " + round);
-            boolean endRound = false;
+            // To make sure if 'draw' happens, the player needs to play again
+            while(true){
+                initializeBoard();
+                numMoves=0;
+                //System.out.println("\nRound " + round);
+                boolean endRound = false;
 
-            while (!endRound) {
-                printBoard();
-                int[] move = getValidMove(currentPlayer);
-                board[move[0]][move[1]] = currentPlayer;
-                numMoves++;
 
-                if(checkWin()){
+                while (!endRound) {
+                    double[] probabilities = getWinProbability();
+                    System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
+                    System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
+
                     printBoard();
-                    System.out.println("Player " + currentPlayer + " wins!");
-                    if(currentPlayer =='X')
-                        playermark++;
-                    else
-                        enginemark++;
-                    System.out.println("Player\t:\tEngine");
-                    System.out.println(playermark + "\t:\t" + enginemark);
-                    endRound = true;
-                    round++;
-                }
-                else if (numMoves == 25) {
-                    System.out.println("It's a draw!");
-                    System.out.println("Player\t:\tEngine");
-                    System.out.println(playermark + "\t:\t" + enginemark);
-                    endRound = true;
-                    round++;
-                }
-                else {
-                    currentPlayer = switchPlayer(currentPlayer);
+                    int[] move = getValidMove(currentPlayer);
+                    board[move[0]][move[1]] = currentPlayer;
+                    numMoves++;
+
+                    if(checkWin()){
+                        printBoard();
+                        System.out.println("Player " + currentPlayer + " wins!");
+                        if(currentPlayer =='X')
+                            playermark++;
+                        else
+                            enginemark++;
+                        System.out.println("Player\t:\tEngine");
+                        System.out.println(playermark + "\t:\t" + enginemark);
+                        round++;
+
+                        return currentPlayer == 'X';
+                    }
+                    else if (numMoves == 25) {
+                        System.out.println("It's a draw!");
+                        System.out.println("Player\t:\tEngine");
+                        System.out.println(playermark + "\t:\t" + enginemark);
+                        System.out.println("Play again!");
+                        round++;
+                        break;
+                    }
+                    else {
+                        currentPlayer = switchPlayer(currentPlayer);
+                    }
                 }
             }
-        }
     }
 
     private static void initializeBoard() {
@@ -64,6 +73,8 @@ public class TicTacToeRegular{
                 board[i][j] = '-';
             }
         }
+        historyMoveRow = new Stack<>();
+        historyMoveCol = new Stack<>();
     }
 
     private static void printInstructions() {
@@ -95,13 +106,31 @@ public class TicTacToeRegular{
         if(currentPlayer == 'X'){
             while (!validMove) {
                 try {
+
+                    if (!historyMoveRow.isEmpty() && !historyMoveCol.isEmpty()){
+                        System.out.println("Do you want to take back a move? (1: Yes, 0: No)");
+                        if (scanner.nextInt() == 1){
+                            takeBackMove();
+                            continue;
+                        }
+                    }
+
                     System.out.print("Player turns.Enter your move (row[1-5] column[1-5]): ");
                     row = scanner.nextInt() - 1;
                     col = scanner.nextInt() - 1;
+
                     if (row >= 0 && row < 5 && col >= 0 && col < 5) {
                         if (board[row][col] != '-') {
                             System.out.println("Invalid move: cell is already occupied");
                         } else {
+
+                            if (board[row][col] == '-') {
+                                historyMoveRow.push(row);
+                                historyMoveCol.push(col);
+                                board[row][col] = currentPlayer;
+                                validMove= true;
+                            }
+
                             board[row][col] = currentPlayer;
                             validMove= true;
                         }
@@ -135,7 +164,7 @@ public class TicTacToeRegular{
         return currentPlayer;
     }
 
-    private static boolean checkWin() {
+    public boolean checkWin() {
         return (checkRowsForWin() || checkColumnsForWin() || checkDiagonalsForWin());
     }
 
@@ -176,4 +205,62 @@ public class TicTacToeRegular{
     private static boolean checkRowCol(char c1, char c2, char c3) {
         return (c1 != '-' && c1 == c2 && c2 == c3);
     }
+
+    private static double[] getWinProbability() {
+        int playerScore = getScore(player);
+        int engineScore = getScore(computer);
+
+        int totalScore = playerScore + engineScore;
+
+        double playerProbability = (double) playerScore / totalScore;
+        double engineProbability = (double) engineScore / totalScore;
+
+        return new double[]{playerProbability, engineProbability};
+    }
+
+    private static int getScore(char player) {
+        int score = 0;
+
+        // Check rows
+        for (int i = 0; i < 5; i++) {
+            score += getLineScore(new char[]{board[i][0], board[i][1], board[i][2], board[i][3], board[i][4]}, player);
+        }
+
+        // Check columns
+        for (int i = 0; i < 5; i++) {
+            score += getLineScore(new char[]{board[0][i], board[1][i], board[2][i], board[3][i], board[4][i]}, player);
+        }
+
+        // Check diagonals
+        score += getLineScore(new char[]{board[0][0], board[1][1], board[2][2], board[3][3], board[4][4]}, player);
+        score += getLineScore(new char[]{board[0][4], board[1][3], board[2][2], board[3][1], board[4][0]}, player);
+
+        return score;
+    }
+
+    private static int getLineScore(char[] line, char player) {
+        int score = 0;
+
+        for (char c : line) {
+            if (c == player) {
+                score++;
+            } else if (c != '-') {
+                return 0;
+            }
+        }
+
+        return score;
+    }
+
+    private static void takeBackMove(){
+        if (!historyMoveRow.isEmpty() && !historyMoveCol.isEmpty()) {
+            int row = historyMoveRow.pop();
+            int col = historyMoveCol.pop();
+            board[row][col] = '-';
+            numMoves--;
+        } else {
+            System.out.println("No moves to take back!");
+        }
+    }
+
 }
