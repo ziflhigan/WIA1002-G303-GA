@@ -20,10 +20,13 @@ public class ConnectingDot {
         Stack<Integer> previousStationRows = new Stack<>();
         Stack<Integer> previousStationCols = new Stack<>();
 
+        Stack<String> pathToCurrentStation = new Stack<>();
+
         ListIterator<String> iter = path.listIterator();
 
         while(iter.hasNext()) {
             String direction = iter.next();
+            pathToCurrentStation.push(direction);
             switch (direction) {
                 case "Up":
                     currentRow--;
@@ -42,7 +45,7 @@ public class ConnectingDot {
             if (copyMap[currentRow][currentCol] == 2) { // if the new position is a station
                 numStation++;
                 System.out.println("\nYou have reached a station! Let's play a game.");
-                System.out.println("You are currently in the station number: " + numStation);
+                System.out.println("You are currently in the station number: " + numStation + "\n");
 
                 TicTacToe game = new TicTacToe();
 
@@ -51,16 +54,43 @@ public class ConnectingDot {
                 if (!win) {
                     System.out.println("Sorry, you have lost the game at this station");
                     System.out.println("You have to fall back to the previous station");
-                    numStation--;
+                    System.out.println("------------------------------------------------------xxxxxxxxxxxxxxxxxxxxxxxx------------------------------------------------------------------");
+
+                    numStation-=2;
 
                     // If player loses, they will fall back to the previous station
                     if (!previousStationRows.empty() && !previousStationCols.empty()) {
-                        currentRow = previousStationRows.pop();
-                        currentCol = previousStationCols.pop();
                         // Fall back and reprocess the station
-                        if(iter.hasPrevious()) {
-                            iter.previous();
+                        while(iter.hasPrevious()) {
+                            String revertDirection = iter.previous();
+                            switch (revertDirection) {
+                                case "Up":
+                                    currentRow++;
+                                    break;
+                                case "Down":
+                                    currentRow--;
+                                    break;
+                                case "Left":
+                                    currentCol++;
+                                    break;
+                                case "Right":
+                                    currentCol--;
+                                    break;
+                            }
                         }
+
+                        /*
+                         Since at the beginning of the first while loop we will update the points, so we need to go back
+                         to the previous station's last location
+                         */
+                        if (currentRow == previousStationRows.peek() && currentCol == previousStationCols.peek() - 1 ||
+                                currentRow == previousStationRows.peek() - 1 && currentCol == previousStationCols.peek() ||
+                                currentRow == previousStationRows.peek() && currentCol == previousStationCols.peek() + 1 ||
+                                currentRow == previousStationRows.peek() + 1 && currentCol == previousStationCols.peek()) {
+                            break;
+                        }
+                        previousStationRows.pop();
+                        previousStationCols.pop();
                     } else {
                         System.out.println("You lost at the first station. Game over.");
                         return;
@@ -68,11 +98,13 @@ public class ConnectingDot {
                 } else {
                     previousStationRows.push(currentRow);
                     previousStationCols.push(currentCol);
+                    System.out.println("Congratulations! You have won the current station game, please proceed to the next station\n");
+                    System.out.println("------------------------------------------------------xxxxxxxxxxxxxxxxxxxxxxxx------------------------------------------------------------------");
                 }
             }
 
             if (copyMap[currentRow][currentCol] == 3) { // if the new position is the final destination
-                System.out.println("Congratulations! You have reached your destination!");
+                System.out.println("Congratulations! You have reached your final destination!");
                 break;
             }
         }

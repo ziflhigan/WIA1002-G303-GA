@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class AStarAllPaths {
+public class BFSAllShortestPaths {
     private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
     private static final String[] DIR_NAMES = {"Up", "Down", "Left", "Right"};
 
