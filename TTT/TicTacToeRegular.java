@@ -17,6 +17,11 @@ public class TicTacToeRegular{
     private static int playermark =0;
     private static int enginemark =0;
     private static Stack<Integer> historyMoveRow, historyMoveCol;
+    private static PlayerAccount playerAccount;
+
+    public TicTacToeRegular(PlayerAccount playerAccount) {
+        this.playerAccount = playerAccount;
+    }
 
     public boolean playgame(){
         printInstructions();
@@ -41,23 +46,35 @@ public class TicTacToeRegular{
 
                     if(checkWin()){
                         printBoard();
-                        System.out.println("Player " + currentPlayer + " wins!");
-                        if(currentPlayer =='X')
+
+                        if(currentPlayer =='X'){
                             playermark++;
-                        else
+                            System.out.println(playerAccount.getUsername()+" wins!");
+                        }
+                        else{
                             enginemark++;
-                        System.out.println("Player\t:\tEngine");
+                            System.out.println("Engine wins!");
+                        }
+
+                        System.out.println(playerAccount.getUsername()+"\t:\tEngine");
                         System.out.println(playermark + "\t:\t" + enginemark);
                         round++;
+
+                        playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                        playerAccount.updateLeaderboard("Engine", enginemark);
 
                         return currentPlayer == 'X';
                     }
                     else if (numMoves == 25) {
                         System.out.println("It's a draw!");
-                        System.out.println("Player\t:\tEngine");
+                        System.out.println(playerAccount.getUsername()+"\t:\tEngine");
                         System.out.println(playermark + "\t:\t" + enginemark);
                         System.out.println("Play again!");
                         round++;
+
+                        playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                        playerAccount.updateLeaderboard("Engine", enginemark);
+
                         break;
                     }
                     else {
@@ -82,7 +99,7 @@ public class TicTacToeRegular{
         System.out.println("A regular game of TTT in a 5x5 square, players take turns placing shapes either\n" +
                 "a cross (X) or a nought (O), the winner is the first player to place 3 of their shape\n" +
                 "in either a horizontal, vertical, or diagonal row.");
-        System.out.println("Player : X, Engine : O");
+        System.out.println(playerAccount.getUsername()+" : X, Engine : O");
         System.out.println("Let's start the game!");
         System.out.println();
     }
@@ -115,7 +132,7 @@ public class TicTacToeRegular{
                         }
                     }
 
-                    System.out.print("Player turns.Enter your move (row[1-5] column[1-5]): ");
+                    System.out.print(playerAccount.getUsername()+"\s turn.Enter your move (row[1-5] column[1-5]): ");
                     row = scanner.nextInt() - 1;
                     col = scanner.nextInt() - 1;
 

@@ -50,6 +50,8 @@ public class ConnectingDot {
                 TicTacToe game = new TicTacToe();
 
                 boolean win = game.playGame();
+                game.getPlayerAccount().displayLeaderboard();
+                game.getPlayerAccount().saveLeaderboard();
 
                 if (!win) {
                     System.out.println("Sorry, you have lost the game at this station");

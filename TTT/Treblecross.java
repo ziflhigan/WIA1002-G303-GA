@@ -15,11 +15,16 @@ public class Treblecross {
     private static int playermark =0;
     private static int enginemark =0;
     private static Stack<Integer> moveHistory = new Stack<>();
+    private static PlayerAccount playerAccount;
+
+    public Treblecross(PlayerAccount playerAccount) {
+        this.playerAccount = playerAccount;
+    }
 
     public boolean playgame() {
         printInstructions();
-        String currentPlayer = "Player";
-        //while(round<4){
+        String currentPlayer = playerAccount.getUsername();
+
             initializeBoard();
             numMoves =0;
             System.out.println("\nRound " + round);
@@ -38,23 +43,26 @@ public class Treblecross {
 
                 if(checkWin()){
                     printBoard();
-                    if(currentPlayer.equals("Player")){
+                    if(currentPlayer.equals(playerAccount.getUsername())){
                         playermark++;
-                        System.out.println("Player wins!");
+                        System.out.println(playerAccount.getUsername()+" wins!");
                     }
                     else{
                         enginemark++;
                         System.out.println("Engine wins!");
                     }
-                    System.out.println("Player\t:\tEngine");
+                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
                     System.out.println(playermark + "\t:\t" + enginemark);
                     round ++;
+
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Engine", enginemark);
 
                     return currentPlayer.equals("Player");
                 }
                 else if(numMoves ==9){
                     System.out.println("It's a draw!");
-                    System.out.println("Player\t:\tEngine");
+                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
                     System.out.println(playermark + "\t:\t" + enginemark);
                     System.out.println("Play again!");
                     round++;
@@ -63,7 +71,7 @@ public class Treblecross {
                     currentPlayer = switchPlayer(currentPlayer);
                 }
             }
-        //}
+
         return false;
     }
 
@@ -72,7 +80,7 @@ public class Treblecross {
         int row = -1;
         boolean validMove = false;
 
-        if(currentPlayer.equals("Player")){
+        if(currentPlayer.equals(playerAccount.getUsername())){
             while (!validMove) {
                 try {
 
@@ -84,7 +92,7 @@ public class Treblecross {
                         }
                     }
 
-                    System.out.print("Player's turn, enter your move(row[1-9]): ");
+                    System.out.print(playerAccount.getUsername()+"'s turn, enter your move(row[1-9]): ");
                     row = scanner.nextInt() -1;
 
                     if (row >= 0 && row < 9) {
@@ -144,10 +152,10 @@ public class Treblecross {
     }
 
     public static String switchPlayer(String currentPlayer) {
-        if (currentPlayer.equals("Player")) {
+        if (currentPlayer.equals(playerAccount.getUsername())) {
             currentPlayer = "Engine";
         } else {
-            currentPlayer = "Player";
+            currentPlayer = playerAccount.getUsername();
         }
         return currentPlayer;
     }
