@@ -125,11 +125,13 @@ public class TicTacToeRegular{
                 try {
 
                     if (!historyMoveRow.isEmpty() && !historyMoveCol.isEmpty()){
-                        System.out.println("Do you want to take back a move? (1: Yes, 0: No)");
+                        System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
                             continue;
                         }
+                    }else {
+                        System.out.println(" There are no moves to be taken back");
                     }
 
                     System.out.print(playerAccount.getUsername()+"\s turn.Enter your move (row[1-5] column[1-5]): ");
@@ -142,8 +144,6 @@ public class TicTacToeRegular{
                         } else {
 
                             if (board[row][col] == '-') {
-                                historyMoveRow.push(row);
-                                historyMoveCol.push(col);
                                 board[row][col] = currentPlayer;
                                 validMove= true;
                             }
@@ -166,6 +166,8 @@ public class TicTacToeRegular{
             row  = enginemove[0];
             col = enginemove[1];
         }
+        historyMoveRow.push(row);
+        historyMoveCol.push(col);
         int[] move = {row, col};
         return move;
     }
@@ -275,6 +277,7 @@ public class TicTacToeRegular{
             int col = historyMoveCol.pop();
             board[row][col] = '-';
             numMoves--;
+            printBoard();
         } else {
             System.out.println("No moves to take back!");
         }

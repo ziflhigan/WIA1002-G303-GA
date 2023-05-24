@@ -123,16 +123,19 @@ public class ReverseTicTacToe {
                 try {
 
                     if (!moves.isEmpty()){
-                        System.out.println("Do you want to take back a move? (1: Yes, 0: No)");
+                        System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
                             continue;
                         }
+                    }else {
+                        System.out.println(" No more moves left to be taken back, please make a move");
                     }
 
                     System.out.print(playerAccount.getUsername()+"'s turn.Enter your move (row[1-3] column[1-3]): ");
                     row = scanner.nextInt() - 1;
                     col = scanner.nextInt() - 1;
+
                     if (row >= 0 && row < 3 && col >= 0 && col < 3) {
                         if (board[row][col] != '-') {
                             System.out.println("Invalid move: cell is already occupied");
@@ -255,7 +258,8 @@ public class ReverseTicTacToe {
             board[lastMove[0]][lastMove[1]] = '-';
             // Decrease the number of moves.
             numMoves--;
-            System.out.println("Last move taken back. It's still your turn.");
+            System.out.println("Last move taken back. ");
+            printBoard();
         } else {
             System.out.println("No moves to take back.");
         }
