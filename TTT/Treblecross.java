@@ -2,6 +2,7 @@
  *
  * @author Xiu Huan
  */
+import java.util.Random;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.util.Stack;
@@ -10,18 +11,34 @@ public class Treblecross {
 
     private static char[] board = new char[9];
     private static int numMoves = 0;
-    static testTreblecross engine = new testTreblecross();
+    //static testTreblecross engine = new testTreblecross();
     private static int round =1;
     private static int playermark =0;
     private static int enginemark =0;
     private static Stack<Integer> moveHistory = new Stack<>();
     private static PlayerAccount playerAccount;
+    private Engine engine;
 
     public Treblecross(PlayerAccount playerAccount) {
         this.playerAccount = playerAccount;
     }
 
     public boolean playgame() {
+        Random rd = new Random();
+        int engNum = rd.nextInt(3);
+        if (engNum == 0){
+            this.engine = new TrebleCrossEngineEasy();
+            System.out.println("You engine's difficulty is easy, you can do it!");
+        }
+        else if (engNum == 1){
+            this.engine = new TrebleCrossEngineMedium();
+            System.out.println("The engine's difficulty level is medium, good luck!");
+        }
+        else {
+            this.engine = new TrebleCrossEngineHard();
+            System.out.println("The engine's difficulty is hard, try your best! ");
+        }
+
         printInstructions();
         String currentPlayer = playerAccount.getUsername();
 
@@ -58,7 +75,7 @@ public class Treblecross {
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
                     playerAccount.updateLeaderboard("Engine", enginemark);
 
-                    return currentPlayer.equals("Player");
+                    return !currentPlayer.equals("Engine");
                 }
                 else if(numMoves ==9){
                     System.out.println("It's a draw!");
@@ -75,7 +92,7 @@ public class Treblecross {
         return false;
     }
 
-    private static int getValidMove(String currentPlayer){
+    private int getValidMove(String currentPlayer){
         Scanner scanner = new Scanner(System.in);
         int row = -1;
         boolean validMove = false;
@@ -85,7 +102,7 @@ public class Treblecross {
                 try {
 
                     if (!moveHistory.isEmpty()){
-                        System.out.println("Do you want to take back a move? (1: Yes, 0: No)");
+                        System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
                             continue;
@@ -113,12 +130,11 @@ public class Treblecross {
         }
         else{
             System.out.println("Engine turns.");
-            row = engine.getinput(currentPlayer, board, 9);
+            row = engine.getMove(board,currentPlayer);
         }
 
-        int move = row;
-        moveHistory.push(move);
-        return move;
+        moveHistory.push(row);
+        return row;
     }
 
     private static void initializeBoard() {
@@ -188,6 +204,7 @@ public class Treblecross {
             board[lastMove] = '-';
             numMoves--;
             System.out.println("Took back last move.");
+            printBoard();
         } else {
             System.out.println("No moves to take back.");
         }
