@@ -19,7 +19,6 @@ public class PlayerAccount {
     private static List<PlayerAccount> accounts = new ArrayList<>();
     static Scanner in = new Scanner(System.in);
 
-
     public PlayerAccount() {
         leaderboard = new ArrayList<>();
     }
@@ -29,12 +28,6 @@ public class PlayerAccount {
         name = username;
         enteredPassword = password;
     }
-
-    @Override
-    public String toString() {
-        return "PlayerAccount [getUsername()=" + getUsername() + ", getPassword()=" + getPassword() + "]";
-    }
-
 
     public String getUsername() {
         return username;
@@ -52,70 +45,111 @@ public class PlayerAccount {
         PlayerAccount.password = password;
     }
 
-
     public static void createAccount() {
-
         System.out.print("Username: ");
         username = in.next();
 
         System.out.print("Password: ");
         password = in.next();
 
-        leaderboard.add(new Player(username, 0));
-        System.out.println("Account created successfully.");
-        saveAccount(username, password); // Save the account into txt file
-
-
+        loadAccountSignup(username, password);
     }
 
     public static void login() {
-
         System.out.print("Username: ");
         String username = in.next();
 
         System.out.print("Password: ");
         String enteredPassword = in.next();
 
-        loadAccount(username, enteredPassword); // Access account in the txt file
-
-
+        loadAccountLogin(username, enteredPassword); // Access account in the txt file
     }
 
     public static void saveAccount(String username, String password) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("player_account.txt",true))) {
             writer.println(username);
             writer.println(password);
-            writer.println(leaderboard.size());
             System.out.println("Player account saved successfully!");
         } catch (IOException e) {
             System.out.println("Error saving the player account.");
         }
     }
 
-    public static void loadAccount(String username, String enteredPassword) {
+    public static void loadAccountSignup(String enteredUsername, String enteredPassword) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("player_account.txt"))) {
+            String line;
+            boolean usernameExists = false;
+            while ((line = reader.readLine()) != null) {
+                String name = line;
+                if (name.equals(enteredUsername)) {
+                    usernameExists = true;
+                    break;
+                }
+            }
+            if (!usernameExists) {
+                leaderboard.add(new Player(enteredUsername, 0));
+                System.out.println("Account created successfully.");
+                saveAccount(enteredUsername, enteredPassword); // Save the account into txt file
+                System.out.println("Please Log In: ");
+                login();
+            } else {
+                System.out.println("The username has already been used by another account!");
+                System.out.println("1. Log in if it's your account.");
+                System.out.println("2. Sign up using another username");
+                System.out.print("Enter your choice: ");
+                int choice = in.nextInt();
+                if (choice == 1) {
+                    login();
+                } else if (choice == 2) {
+                    createAccount();
+                } else {
+                    System.out.println("Invalid choice. Please try again.");
+                    createAccount();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading the player account.");
+        }
+    }
+    public static boolean loadAccountLogin(String username, String enteredPassword) {
         try (BufferedReader reader= new BufferedReader(new FileReader("player_account.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String name = line;
                 String password = reader.readLine();
-
                 PlayerAccount account = new PlayerAccount(name, password);
                 account.setUsername(name);
                 accounts.add(account);
-                //System.out.println(account.toString());
+                if(account.getUsername().equals(username)) {
+                    if (account.getUsername().equals(username) && password.equals(enteredPassword)) {
+                        System.out.println("Login successful!");
+                        return true;
+                    }
+                    else if(account.getUsername().equals(username) && !password.equals(enteredPassword)) {
+                        System.out.println("The username and/or password is invalid. Please try again.");
+                        login();
+                        return true;
+                    }
 
-                if (account.getUsername().equals(username) && password.equals(enteredPassword)) {
-                    System.out.println("Login successful!");
-                    return;
                 }
             }
-            System.out.println("The username and/or password is invalid. Please try again.");
-            login();
+            System.out.println("No username found. Do you wish to Sign up or Log in(0 : Sign up, 1 : Log in)");
+            int num = in.nextInt();
+            if(num == 0) {
+                createAccount();
+                return false;
+            }
+            else if(num == 1) {
+                login();
+                return false;
+            }
 
         } catch (IOException e) {
             System.out.println("Error loading the player account.");
         }
+        return false;
     }
+
     public void updateLeaderboard(String name, int score) {
         for (Player player : leaderboard) {
             if (player.getUsername().equals(name)) {
@@ -123,17 +157,25 @@ public class PlayerAccount {
                 return;
             }
         }
-
         leaderboard.add(new Player(name, score));
     }
 
     public void displayLeaderboard() {
-        System.out.println("Leaderboard:");
+        System.out.println("\nLeaderboard:\n");
         // Sort the leaderboard in descending order based on the scores
         leaderboard.sort(Comparator.comparingInt(Player::getScore).reversed());
+
+        int rank = 1;
+        System.out.println("+--------------------------------+");
+        System.out.printf("| %-4s | %-10s | %-8s |%n", "Rank", "Username", "Total Wins");
+        System.out.println("+--------------------------------+");
+
         for (Player player : leaderboard) {
-            System.out.println(player.getUsername() + ": " + player.getScore());
+            System.out.printf("| %-4d | %-10s | %-10d |%n", rank, player.getUsername(), player.getScore());
+            rank++;
         }
+
+        System.out.println("+--------------------------------+");
     }
 
     public void saveLeaderboard() {
@@ -164,24 +206,13 @@ public class PlayerAccount {
 
 class Player {
     private String username;
-    private String password;
     private int score;
 
     public Player(String username, int score) {
         this.username = username;
         this.score = score;
     }
-    public Player(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
 
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
     public String getUsername() {
         return username;
     }
