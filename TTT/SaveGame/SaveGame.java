@@ -7,11 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SaveGame {
-    public static void save(int[][] grid) {
+    public static void save(int[][] grid, int boardSize) {
         String fileName = generateFileName();
         try (PrintWriter writer = new PrintWriter(new FileWriter("savedGames/" + fileName))) {
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
+            for (int i = 0; i < boardSize; i++) {
+                for (int j = 0; j < boardSize; j++) {
                     writer.write(grid[i][j] + " ");
                 }
                 writer.write("\n");
