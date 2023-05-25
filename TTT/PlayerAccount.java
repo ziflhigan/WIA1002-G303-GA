@@ -72,7 +72,15 @@ public class PlayerAccount implements Serializable {
     }
 
     public static void loadAccountSignup(String enteredUsername, String enteredPassword) {
-        try (BufferedReader reader = new BufferedReader(new FileReader("player_account.txt"))) {
+        File file = new File("player_account.txt");
+
+        try {
+
+            if(!file.exists()) {
+                file.createNewFile();
+            }
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+
             String line;
             boolean usernameExists = false;
             while ((line = reader.readLine()) != null) {
@@ -108,7 +116,16 @@ public class PlayerAccount implements Serializable {
         }
     }
     public static boolean loadAccountLogin(String username, String enteredPassword) {
-        try (BufferedReader reader= new BufferedReader(new FileReader("player_account.txt"))) {
+
+        File file = new File("player_account.txt");
+
+        try {
+
+            if(!file.exists()) {
+                file.createNewFile();
+            }
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+
             String line;
             while ((line = reader.readLine()) != null) {
                 String name = line;
