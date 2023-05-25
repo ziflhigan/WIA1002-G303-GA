@@ -3,6 +3,10 @@
  *
  * @author Xiu Huan
  */
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.util.Stack;
@@ -64,6 +68,7 @@ public class ReverseTicTacToe {
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
                     playerAccount.updateLeaderboard("Engine", enginemark);
 
+                    moves.clear();
                     return currentPlayer == 'X';
                 }
                 else if (numMoves == 9) {
@@ -75,6 +80,8 @@ public class ReverseTicTacToe {
 
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
                     playerAccount.updateLeaderboard("Engine", enginemark);
+                    // Clear the history stack for the next round
+                    moves.clear();
 
                     break;
                 }
@@ -82,6 +89,7 @@ public class ReverseTicTacToe {
                     currentPlayer = switchPlayer(currentPlayer);
                 }
             }
+
         }
     }
 
@@ -112,7 +120,7 @@ public class ReverseTicTacToe {
         System.out.println();
     }
 
-    private static int[] getValidMove(char currentPlayer) {
+    private int[] getValidMove(char currentPlayer) {
         Scanner scanner = new Scanner(System.in);
         int row = -1;
         int col = -1;
@@ -128,11 +136,28 @@ public class ReverseTicTacToe {
                             takeBackMove();
                             continue;
                         }
+
                     }else {
-                        System.out.println(" No more moves left to be taken back, please make a move");
+                        System.out.println("No more moves left to be taken back, please make a move");
                     }
 
-                    System.out.print(playerAccount.getUsername()+"'s turn.Enter your move (row[1-3] column[1-3]): ");
+                    System.out.println(playerAccount.getUsername()+"\s turn \n 1. Make a move\n 2. Save game\n 3. Load game\n");
+                    int choices = scanner.nextInt();
+                    scanner.nextLine();
+
+                    switch (choices){
+                        case 1:
+                            break;
+                        case 2:
+                            saveGame();
+                            break;
+                        case 3:
+                            loadGame("Reverse");
+                            printBoard();
+                            break;
+                    }
+
+                    System.out.print("Enter your move (row[1-5] column[1-5]): ");
                     row = scanner.nextInt() - 1;
                     col = scanner.nextInt() - 1;
 
@@ -264,5 +289,64 @@ public class ReverseTicTacToe {
             System.out.println("No moves to take back.");
         }
     }
+
+    private void saveGame() {
+
+        if (numMoves == 0){
+            System.out.println("There are no any moves yet, make a move!");
+            return;
+        }
+
+        Scanner sc = new Scanner(System.in);
+        GameState gameState = new GameState("Reverse", board, numMoves, round, playermark, enginemark, playerAccount);
+        System.out.println("Enter a file name to be saved (No suffix)");
+        String fileName = sc.nextLine() + ".ser";
+
+
+        // Check the file already exits or not
+        Path path = Paths.get( fileName);
+        while (Files.exists(path)) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("A saved game with this file name already exists. Please enter a different name for the saved game file.");
+            fileName = scanner.nextLine();
+            path = Paths.get( fileName);
+        }
+
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream( fileName))) {
+            out.writeObject(gameState);
+            System.out.println("Game saved successfully!");
+        } catch (IOException e) {
+            System.out.println("Error saving the game: " + e.getMessage());
+        }
+    }
+
+    public void loadGame(String currentGameVersion) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Enter a file name to load");
+        String fileName = sc.nextLine() + ".ser";
+        GameState loadedState = null;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream( fileName))) {
+            loadedState = (GameState) in.readObject();
+
+            // Check game version
+            if (!loadedState.getGameVersion().equals(currentGameVersion)) {
+                System.out.println("The loaded game is not compatible with the current version of Tic Tac Toe. Please load a compatible saved game.");
+                return;
+            }
+
+            this.board = loadedState.board;
+            this.numMoves = loadedState.numMoves;
+            this.round = loadedState.round;
+            this.playermark = loadedState.playerMark;
+            this.enginemark = loadedState.engineMark;
+            this.playerAccount = loadedState.playerAccount;
+            System.out.println("Game loaded successfully!");
+            System.out.println("The game was played by:" + playerAccount.getUsername());
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading the game.");
+        }
+    }
+
 }
 

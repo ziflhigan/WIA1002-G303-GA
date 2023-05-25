@@ -2,10 +2,15 @@
  *
  * @author Xiu Huan
  */
-import java.util.Random;
-import java.util.Scanner;
-import java.util.InputMismatchException;
-import java.util.Stack;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Treblecross {
 
@@ -26,6 +31,7 @@ public class Treblecross {
     public boolean playgame() {
         Random rd = new Random();
         int engNum = rd.nextInt(3);
+
         if (engNum == 0){
             this.engine = new TrebleCrossEngineEasy();
             System.out.println("You engine's difficulty is easy, you can do it!");
@@ -75,6 +81,7 @@ public class Treblecross {
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
                     playerAccount.updateLeaderboard("Engine", enginemark);
 
+                    moveHistory.clear();
                     return !currentPlayer.equals("Engine");
                 }
                 else if(numMoves ==9){
@@ -109,8 +116,28 @@ public class Treblecross {
                         }
                     }
 
-                    System.out.print(playerAccount.getUsername()+"'s turn, enter your move(row[1-9]): ");
-                    row = scanner.nextInt() -1;
+                    System.out.print(playerAccount.getUsername()+"'s turn\n 1. make a move\n 2. save game \n 3. load game \n");
+                    int choice = scanner.nextInt();
+                    scanner.nextLine();
+                    switch (choice){
+                        case 1:
+                            break;
+                        case 2:
+                            saveGame(board);
+                            break;
+                        case 3:
+                            System.out.println("Enter a filename to load (no suffix)");
+                            String fN = scanner.nextLine() + ".txt";
+                            loadGame(fN);
+                            printBoard();
+                            break;
+                        default:
+                            System.out.println("Invalid choice, try again");
+                    }
+
+                    System.out.println("enter your move(row[1-9])");
+                    row = scanner.nextInt() - 1;
+                    scanner.nextLine();
 
                     if (row >= 0 && row < 9) {
                         if (board[row] != '-') {
@@ -131,6 +158,7 @@ public class Treblecross {
         else{
             System.out.println("Engine turns.");
             row = engine.getMove(board,currentPlayer);
+
         }
 
         moveHistory.push(row);
@@ -207,6 +235,66 @@ public class Treblecross {
             printBoard();
         } else {
             System.out.println("No moves to take back.");
+        }
+    }
+
+    public void saveGame(char[] board) {
+
+        //CHeck the board is empty or not first
+        int count = 0;
+        for (int i = 0; i < board.length; i++) {
+            if (board[i] == '-'){
+                count++;
+            }
+        }
+        if (count == 9){
+            System.out.println("The board is empty, make move first!");
+            return;
+        }
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter a file name to be saved");
+        String fileName = sc.nextLine() + ".txt";
+
+        Path path = Paths.get( fileName);
+        while (Files.exists(path)) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("A saved game with this file name already exists. Please enter a different name for the saved game file.");
+            fileName = scanner.nextLine();
+            path = Paths.get( fileName);
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter( fileName ))) {
+            for (int i = 0; i < board.length; i++) {
+                writer.write(board[i] + " ");
+            }
+
+            writer.println();
+            writer.println("The game was played by the player: " + playerAccount.getUsername());
+            System.out.println("Game saved successfully!");
+        } catch (IOException e) {
+            System.out.println("Error saving the game.");
+        }
+    }
+
+    public void loadGame(String fileName) {
+        char[] tempBoard = new char[9];
+        try (Scanner scanner = new Scanner(new FileReader(fileName))) {
+            String[] line = scanner.nextLine().split(" ");
+            for (int i = 0; i < 9; i++) {
+                tempBoard[i] = line[i].charAt(0);
+            }
+            while (scanner.hasNextLine()){
+                System.out.println(scanner.nextLine());
+            }
+
+            System.out.println("Game loaded successfully!");
+        } catch (IOException e) {
+            System.out.println("Error loading the game.");
+        }
+
+        for (int i = 0; i < board.length; i++){
+            board [i] = tempBoard[i];
         }
     }
 
