@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class TestWithTrebleCrossEngine {
+public class TestWithTTTRegular {
     public static void main(String[] args) {
         PlayerAccount playerAccount = new PlayerAccount();
         System.out.println("Sign Up or Log In? (0 : Sign Up, 1 : Log In)");
@@ -16,7 +16,8 @@ public class TestWithTrebleCrossEngine {
         System.out.println();
         playerAccount.loadLeaderboard();
 
-        Treblecross game = new Treblecross(playerAccount);
+        TicTacToeRegular game = new TicTacToeRegular(playerAccount);
         boolean win = game.playgame();
     }
+
 }
