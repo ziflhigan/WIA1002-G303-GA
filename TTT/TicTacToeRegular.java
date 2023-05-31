@@ -2,11 +2,15 @@
  *
  * @author Xiu Huan
  */
+import GameEngine.EngineInterface;
+import GameEngine.RegularEngineHard;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.InputMismatchException;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -16,15 +20,27 @@ public class TicTacToeRegular implements Serializable{
     private static char player = 'X';
     private static char computer = 'O';
     private static int numMoves = 0;
-    static test engine = new test();
     private static int round =1;
     private static int playermark =0;
     private static int enginemark =0;
     private static Stack<Integer> historyMoveRow, historyMoveCol;
     private static PlayerAccount playerAccount;
+    EngineInterface engine = new RegularEngineHard();
 
     public TicTacToeRegular(PlayerAccount playerAccount) {
+
+        Random rd = new Random();
+        int engNum = rd.nextInt(3);
+        if (engNum == 0){
+            // Initialise the easy engine here
+        } else if (engNum == 1) {
+            // Initialise the medium engine here
+        }else {
+            engine = new RegularEngineHard();
+        }
+
         this.playerAccount = playerAccount;
+
     }
 
     public boolean playgame(){
@@ -137,6 +153,8 @@ public class TicTacToeRegular implements Serializable{
                         System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
+                            takeBackMove();
+                            System.out.println("Both of the player's and Engine's move have been taken back");
                             continue;
                         }
                     }else {
@@ -187,7 +205,7 @@ public class TicTacToeRegular implements Serializable{
         }
         else{
             System.out.println("Engine turns.");
-            int[] enginemove = engine.getinput(currentPlayer, board, 5);
+            int[] enginemove = engine.getMove(board);
             row  = enginemove[0];
             col = enginemove[1];
         }
@@ -330,7 +348,7 @@ public class TicTacToeRegular implements Serializable{
             path = Paths.get( fileName);
         }
 
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream( fileName))) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream( "UserSaveGames\\" + fileName))) {
             out.writeObject(gameState);
             System.out.println("Game saved successfully!");
         } catch (IOException e) {
@@ -344,7 +362,7 @@ public class TicTacToeRegular implements Serializable{
         System.out.println("Enter a file name to load (No suffix)");
         String fileName = sc.nextLine() + ".ser";
         GameState loadedState = null;
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream( fileName))) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream( "UserSaveGames\\" + fileName))) {
             loadedState = (GameState) in.readObject();
 
             // Check game version
@@ -353,18 +371,24 @@ public class TicTacToeRegular implements Serializable{
                 return;
             }
 
-            this.board = loadedState.board;
-            this.numMoves = loadedState.numMoves;
-            this.round = loadedState.round;
-            this.playermark = loadedState.playerMark;
-            this.enginemark = loadedState.engineMark;
-            this.playerAccount = loadedState.playerAccount;
+            board = loadedState.board;
+            numMoves = loadedState.numMoves;
+            round = loadedState.round;
+            playermark = loadedState.playerMark;
+            enginemark = loadedState.engineMark;
+            playerAccount = loadedState.playerAccount;
             System.out.println("Game loaded successfully!");
             System.out.println("The game was played by:" + playerAccount.getUsername());
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Error loading the game.");
+        } catch (FileNotFoundException e) {
+            System.out.println("Error finding the save game file: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error loading the game state class: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error reading the save game file: " + e.getMessage());
         }
     }
 
-
+    public static char[][] getBoard() {
+        return board;
+    }
 }

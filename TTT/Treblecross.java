@@ -2,6 +2,8 @@
  *
  * @author Xiu Huan
  */
+import GameEngine.EasyTTTEngine;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -112,6 +114,8 @@ public class Treblecross {
                         System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
+                            takeBackMove();
+                            System.out.println("Both of the player and Engine's turn have been taken back");
                             continue;
                         }
                     }
@@ -133,6 +137,7 @@ public class Treblecross {
                             break;
                         default:
                             System.out.println("Invalid choice, try again");
+                            continue;
                     }
 
                     System.out.println("enter your move(row[1-9])");
@@ -264,7 +269,7 @@ public class Treblecross {
             path = Paths.get( fileName);
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter( fileName ))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter( "UserSaveGames\\" + fileName ))) {
             for (int i = 0; i < board.length; i++) {
                 writer.write(board[i] + " ");
             }
@@ -279,7 +284,9 @@ public class Treblecross {
 
     public void loadGame(String fileName) {
         char[] tempBoard = new char[9];
-        try (Scanner scanner = new Scanner(new FileReader(fileName))) {
+
+        boolean success = false;
+        try (Scanner scanner = new Scanner(new FileReader("UserSaveGames\\" + fileName))) {
             String[] line = scanner.nextLine().split(" ");
             for (int i = 0; i < 9; i++) {
                 tempBoard[i] = line[i].charAt(0);
@@ -291,6 +298,7 @@ public class Treblecross {
             System.out.println("Game loaded successfully!");
         } catch (IOException e) {
             System.out.println("Error loading the game.");
+            return;
         }
 
         for (int i = 0; i < board.length; i++){
