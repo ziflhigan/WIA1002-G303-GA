@@ -3,10 +3,10 @@
  */
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 public class PlayerAccount implements Serializable {
     private static String username;
@@ -23,6 +23,27 @@ public class PlayerAccount implements Serializable {
     public PlayerAccount(String name, String enteredPassword){
         name = username;
         enteredPassword = password;
+    }
+
+    public static String hashPassword(String password) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Failed to get SHA-256 MessageDigest", e);
+        }
+        byte[] encodedhash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+        return bytesToHex(encodedhash);
+    }
+
+    private static String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if(hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString();
     }
 
     public String getUsername() {
@@ -47,6 +68,8 @@ public class PlayerAccount implements Serializable {
 
         System.out.print("Password: ");
         password = in.next();
+
+        password = hashPassword(password); // Hash the password
 
         loadAccountSignup(username, password);
     }
@@ -120,7 +143,6 @@ public class PlayerAccount implements Serializable {
         File file = new File("player_account.txt");
 
         try {
-
             if(!file.exists()) {
                 file.createNewFile();
             }
@@ -134,7 +156,7 @@ public class PlayerAccount implements Serializable {
                 account.setUsername(name);
                 accounts.add(account);
                 if(account.getUsername().equals(username)) {
-                    if (account.getUsername().equals(username) && password.equals(enteredPassword)) {
+                    if (account.getUsername().equals(username) && account.getPassword().equals(hashPassword(enteredPassword))) {
                         System.out.println("Login successful!");
                         return true;
                     }
@@ -146,19 +168,29 @@ public class PlayerAccount implements Serializable {
 
                 }
             }
-            System.out.println("No username found. Do you wish to Sign up or Log in(0 : Sign up, 1 : Log in)");
-            int num = in.nextInt();
-            if(num == 0) {
-                createAccount();
-                return false;
-            }
-            else if(num == 1) {
-                login();
-                return false;
+
+            while (true){
+                try{
+                    System.out.println("No username found. Do you wish to Sign up or Log in (0 : Sign up, 1 : Log in)");
+                    int num = in.nextInt();
+                    if(num == 0) {
+                        createAccount();
+                        return false;
+                    }
+                    else if(num == 1) {
+                        login();
+                        return false;
+                    }
+                }catch (NumberFormatException | InputMismatchException e){
+                    System.out.println("Please enter either 1 or 0 ! ");
+                    in.nextLine();
+                }
             }
 
         } catch (IOException e) {
             System.out.println("Error loading the player account.");
+        } catch (InputMismatchException e){
+            System.out.println("Invalid input!");
         }
         return false;
     }
