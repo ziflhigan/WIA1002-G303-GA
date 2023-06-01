@@ -2,6 +2,8 @@
  *
  * @author Xiu Huan
  */
+
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,7 +11,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Treblecross {
@@ -23,12 +24,23 @@ public class Treblecross {
     private static Stack<Integer> moveHistory = new Stack<>();
     private static PlayerAccount playerAccount;
     private Engine engine;
+    private Engine SecondEngine;
 
     public Treblecross(PlayerAccount playerAccount) {
         this.playerAccount = playerAccount;
     }
 
     public boolean playgame() {
+        String gameMode = getGameMode();
+        switch (gameMode) {
+            case "PVP":
+                return playPVP();
+            default:
+                return playPVE();
+        }
+    }
+
+    public boolean playPVE(){
         Random rd = new Random();
         int engNum = rd.nextInt(3);
 
@@ -48,58 +60,113 @@ public class Treblecross {
         printInstructions();
         String currentPlayer = playerAccount.getUsername();
 
-            initializeBoard();
-            numMoves =0;
-            System.out.println("\nRound " + round);
-            boolean endRound = false;
+        initializeBoard();
+        numMoves =0;
+        System.out.println("\nRound " + round);
+        boolean endRound = false;
 
-            while (!endRound) {
+        while (!endRound) {
 
-                double[] probabilities = getWinProbability(currentPlayer);
-                System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
-                System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
+            double[] probabilities = getWinProbability(currentPlayer);
+            System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
+            System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
 
+            printBoard();
+            int move = getValidMove(currentPlayer, false);
+            board[move] = 'X';
+            numMoves++;
+
+            if(checkWin()){
                 printBoard();
-                int move = getValidMove(currentPlayer);
-                board[move] = 'X';
-                numMoves++;
-
-                if(checkWin()){
-                    printBoard();
-                    if(currentPlayer.equals(playerAccount.getUsername())){
-                        playermark++;
-                        System.out.println(playerAccount.getUsername()+" wins!");
-                    }
-                    else{
-                        enginemark++;
-                        System.out.println("Engine wins!");
-                    }
-                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
-                    System.out.println(playermark + "\t:\t" + enginemark);
-                    round ++;
-
-                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
-                    playerAccount.updateLeaderboard("Engine", enginemark);
-
-                    moveHistory.clear();
-                    return !currentPlayer.equals("Engine");
-                }
-                else if(numMoves ==9){
-                    System.out.println("It's a draw!");
-                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
-                    System.out.println(playermark + "\t:\t" + enginemark);
-                    System.out.println("Play again!");
-                    round++;
+                if(currentPlayer.equals(playerAccount.getUsername())){
+                    playermark++;
+                    System.out.println(playerAccount.getUsername()+" wins!");
                 }
                 else{
-                    currentPlayer = switchPlayer(currentPlayer);
+                    enginemark++;
+                    System.out.println("Engine wins!");
                 }
+                System.out.println(playerAccount.getUsername()+"\t:\tEngine");
+                System.out.println(playermark + "\t:\t" + enginemark);
+                round ++;
+
+                playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                playerAccount.updateLeaderboard("Engine", enginemark);
+
+                moveHistory.clear();
+                return !currentPlayer.equals("Engine");
             }
+            else if(numMoves ==9){
+                System.out.println("It's a draw!");
+                System.out.println(playerAccount.getUsername()+"\t:\tEngine");
+                System.out.println(playermark + "\t:\t" + enginemark);
+                System.out.println("Play again!");
+                round++;
+            }
+            else{
+                currentPlayer = switchPlayer(currentPlayer);
+            }
+        }
 
         return false;
     }
 
-    private int getValidMove(String currentPlayer){
+    public boolean playPVP() {
+        printInstructions();
+        String currentPlayer = playerAccount.getUsername();
+
+        initializeBoard();
+        numMoves =0;
+        System.out.println("\nRound " + round);
+        boolean endRound = false;
+
+        while (!endRound) {
+
+            double[] probabilities = getWinProbability(currentPlayer);
+            System.out.println("First Player's win probability: " + probabilities[0] * 100 + "%");
+            System.out.println("Second player's win probability: " + probabilities[1] * 100 + "%");
+
+            printBoard();
+            int move = getValidMove(currentPlayer, true);
+            board[move] = 'X';
+            numMoves++;
+
+            if(checkWin()){
+                printBoard();
+                if(currentPlayer.equals(playerAccount.getUsername())){
+                    playermark++;
+                    System.out.println(playerAccount.getUsername()+" wins!");
+                }
+                else{
+                    enginemark++;
+                    System.out.println("Second player wins!");
+                }
+                System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                System.out.println(playermark + "\t:\t" + enginemark);
+                round ++;
+
+                playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                playerAccount.updateLeaderboard("Second Player", enginemark);
+
+                moveHistory.clear();
+                return !currentPlayer.equals("Engine");
+            }
+            else if(numMoves ==9){
+                System.out.println("It's a draw!");
+                System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                System.out.println(playermark + "\t:\t" + enginemark);
+                System.out.println("Play again!");
+                round++;
+            }
+            else{
+                currentPlayer = switchPlayer(currentPlayer);
+            }
+        }
+
+        return false;
+    }
+
+    private int getValidMove(String currentPlayer, boolean isHuman){
         Scanner scanner = new Scanner(System.in);
         int row = -1;
         boolean validMove = false;
@@ -112,6 +179,8 @@ public class Treblecross {
                         System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
+                            takeBackMove();
+                            System.out.println("Both of the player and Engine's turn have been taken back");
                             continue;
                         }
                     }
@@ -133,6 +202,7 @@ public class Treblecross {
                             break;
                         default:
                             System.out.println("Invalid choice, try again");
+                            continue;
                     }
 
                     System.out.println("enter your move(row[1-9])");
@@ -156,8 +226,15 @@ public class Treblecross {
             }
         }
         else{
-            System.out.println("Engine turns.");
-            row = engine.getMove(board,currentPlayer);
+
+            if (isHuman){
+
+                row = getMoveSecondPlayer();
+
+            }else{
+                System.out.println("Engine turns.");
+                row = engine.getMove(board,currentPlayer);
+            }
 
         }
 
@@ -165,6 +242,35 @@ public class Treblecross {
         return row;
     }
 
+    public int getMoveSecondPlayer(){
+
+        Scanner sc = new Scanner(System.in);
+        int move;
+
+        while (true){
+
+            try{
+                System.out.println("Second player, enter your move(row[1-9])");
+                move = sc.nextInt() - 1;
+                if (move >= 0 && move < 9) {
+                    if (board[move] != '-') {
+                        System.out.println("Invalid move: cell is already occupied");
+                    } else {
+                        board[move] = 'O';
+                        break;
+                    }
+                } else {
+                    System.out.println("Invalid move: number must be between 1 and 9");
+
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter integers.");
+                sc.nextLine(); // consume the invalid input
+            }
+        }
+
+        return move;
+    }
     private static void initializeBoard() {
         for (int i = 0; i < 9; i++) {
             board[i] = '-';
@@ -173,7 +279,7 @@ public class Treblecross {
 
     private static void printInstructions() {
         System.out.println("Treblecross");
-        System.out.println("The game begins with all the 1×n spaces empty. Each player plays an X on the one-dimensional board in an empty cell.");
+        System.out.println("The game begins with all the 1×9 spaces empty. Each player plays an X on the one-dimensional board in an empty cell.");
         System.out.println("The game is won when a player makes a row of three Xs");
         System.out.println("Let's start the game!");
         System.out.println();
@@ -264,7 +370,7 @@ public class Treblecross {
             path = Paths.get( fileName);
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter( fileName ))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter( "UserSaveGames\\" + fileName ))) {
             for (int i = 0; i < board.length; i++) {
                 writer.write(board[i] + " ");
             }
@@ -279,7 +385,9 @@ public class Treblecross {
 
     public void loadGame(String fileName) {
         char[] tempBoard = new char[9];
-        try (Scanner scanner = new Scanner(new FileReader(fileName))) {
+
+        boolean success = false;
+        try (Scanner scanner = new Scanner(new FileReader("UserSaveGames\\" + fileName))) {
             String[] line = scanner.nextLine().split(" ");
             for (int i = 0; i < 9; i++) {
                 tempBoard[i] = line[i].charAt(0);
@@ -291,11 +399,30 @@ public class Treblecross {
             System.out.println("Game loaded successfully!");
         } catch (IOException e) {
             System.out.println("Error loading the game.");
+            return;
         }
 
         for (int i = 0; i < board.length; i++){
             board [i] = tempBoard[i];
         }
     }
+
+    public String getGameMode() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Choose game mode: ");
+        System.out.println("1. Player vs Player (PVP)");
+        System.out.println("2. Player vs Engine (PVE)");
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1:
+                return "PVP";
+            case 2:
+                return "PVE";
+            default:
+                System.out.println("Invalid choice, defaulting to PVE");
+                return "PVE";
+        }
+    }
+
 
 }
