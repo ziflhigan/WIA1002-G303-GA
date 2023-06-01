@@ -80,9 +80,7 @@ public class DifficultTTTEngine extends RegularEngine {
             return 10 - depth;
         } else if (checkWin(board, opponent)) {
             return depth - 10;
-        } else if (isBoardFull(board)) {
-            return 0;
-        }
+        } 
 
         if (isMaximizingPlayer) {
             int bestScore = Integer.MIN_VALUE;
@@ -174,14 +172,4 @@ public class DifficultTTTEngine extends RegularEngine {
         return false;
     }
 
-    private boolean isBoardFull(int[][] board) {
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                if (board[row][col] == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 }
