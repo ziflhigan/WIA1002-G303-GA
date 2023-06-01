@@ -10,7 +10,7 @@ public class RegularEngineEasy implements EngineInterface{
         ArrayList<int[]> availableMoves = new ArrayList<>();
     
         for (int row = 0; row < 5; row++) {
-            for (int col = 0; col < 5; col++) {
+            for (int col = 0; col < 3; col++) {
                 if (board[row][col] == '-') {
                     availableMoves.add(new int[]{row, col});
                 }

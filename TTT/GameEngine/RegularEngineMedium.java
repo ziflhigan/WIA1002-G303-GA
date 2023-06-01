@@ -6,9 +6,9 @@ import java.util.Random;
 public class RegularEngineMedium implements EngineInterface {
 
     private char[][] copyBoard(char[][] original) {
-        char[][] copy = new char[3][3];
+        char[][] copy = new char[5][5];
 
-        for (int row = 0; row < 3; row++) {
+        for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 3; col++) {
                 copy[row][col] = original[row][col];
             }

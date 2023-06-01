@@ -27,7 +27,8 @@ public class TicTacToeRegular implements Serializable{
     private static int enginemark =0;
     private static Stack<Integer> historyMoveRow, historyMoveCol;
     private static PlayerAccount playerAccount;
-    EngineInterface engine = new RegularEngineHard();
+    
+    EngineInterface engine ;
 
     public TicTacToeRegular(PlayerAccount playerAccount) {
 
