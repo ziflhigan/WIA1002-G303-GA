@@ -1,90 +1,103 @@
 package GameEngine;
 
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Random;
 
-public class ReverseEngineHard extends ReverseEngine {
-    String winner = "draw";
+public class ReverseEngineHard implements EngineInterface{
 
-    @Override
-    protected boolean getWinner(String turnPrompt, int[][] board, int currentPlayer, Scanner scanner) {
-        System.out.println(turnPrompt);
-        int row, col;
-        while (true) {
+    private char[][] copyBoard(char[][] original) {
+        char[][] copy = new char[3][3];
 
-            if (currentPlayer == 1) {
-                row = getValidInt(scanner, "Enter row (0-2): ", 0, 2);
-                col = getValidInt(scanner, "Enter col (0-2): ", 0, 2);
-            } else {
-                int[] bestMove = minimax(board, currentPlayer);
-                row = bestMove[0];
-                col = bestMove[1];
-
-                System.out.printf("\nComputer chooses [%d,%d]\n", row, col);
-            }
-
-            if (board[row][col] != 0) {
-                System.out.printf("[%d,%d] is already filled! Please choose an empty cell.\n", row, col);
-            } else {
-                board[row][col] = currentPlayer;
-                boolean isWinner = checkHit(board, row, col);
-
-                if (isWinner) {
-                    if (currentPlayer == 1) {
-                        System.out.println("\n\nPlayer 1 wins!");
-                        winner = "Player 1";
-                    } else {
-                        System.out.println("\n\nComputer wins!");
-                        winner = "Computer";
-                    }
-                    return true;
-                }
-                return false;
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                copy[row][col] = original[row][col];
             }
         }
+
+        return copy;
     }
 
-    private int[] minimax(int[][] board, int currentPlayer) {
-        int[] bestMove = new int[2];
-        int bestScore = Integer.MIN_VALUE;
-
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                if (board[row][col] == 0) {
-                    board[row][col] = currentPlayer;
-                    int score = minimaxHelper(board, currentPlayer, 0, false);
-                    board[row][col] = 0;
-
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestMove[0] = row;
-                        bestMove[1] = col;
-                    }
+    private int countEmptyCells(char[][] board) {
+        int count = 0;
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                if (board[row][col] == '-') {
+                    count++;
                 }
             }
         }
-
-        return bestMove;
+        return count;
     }
 
-    private int minimaxHelper(int[][] board, int currentPlayer, int depth, boolean isMaximizingPlayer) {
-        int opponent = (currentPlayer == 1) ? 2 : 1;
-
-        if (checkWin(board, currentPlayer)) {
-            return 10 - depth;
-        } else if (checkWin(board, opponent)) {
-            return depth - 10;
+    private int evaluateBoard(char[][] board) {
+        int score = 0;
+    
+        // Check rows and columns
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
+                if (board[i][0] == 'O') {
+                    score = 1;
+                    break;
+                } else if (board[i][0] == 'X') {
+                    score = -1;
+                    break;
+                }
+            }
+    
+            if (board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
+                if (board[0][i] == 'O') {
+                    score = 1;
+                    break;
+                } else if (board[0][i] == 'X') {
+                    score = -1;
+                    break;
+                }
+            }
         }
+    
+        // Check diagonals
+        if (board[0][0] == board[1][1] && board[0][0] == board[2][2]) {
+            if (board[0][0] == 'O') {
+                score = 1;
+            } else if (board[0][0] == 'X') {
+                score = -1;
+            }
+        }
+    
+        if (board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
+            if (board[0][2] == 'O') {
+                score = 1;
+            } else if (board[0][2] == 'X') {
+                score = -1;
+            }
+        }
+    
+        return score;
+    }
+    
+
+    private int minimax(char[][] board, int depth, boolean isMaximizingPlayer, int alpha, int beta) {
+        int score = evaluateBoard(board);
+
+        if (score != 0 || depth == 0) {
+            return score;
+        }
+
         if (isMaximizingPlayer) {
             int bestScore = Integer.MIN_VALUE;
 
-            for (int row = 0; row < boardSize; row++) {
-                for (int col = 0; col < boardSize; col++) {
-                    if (board[row][col] == 0) {
-                        board[row][col] = currentPlayer;
-                        int score = minimaxHelper(board, opponent, depth + 1, false);
-                        board[row][col] = 0;
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    if (board[row][col] == '-') {
+                        board[row][col] = 'O';
+                        int currentScore = minimax(board, depth - 1, false, alpha, beta);
+                        board[row][col] = '-';
+                        bestScore = Math.max(bestScore, currentScore);
+                        alpha = Math.max(alpha, bestScore);
 
-                        bestScore = Math.max(score, bestScore);
+                        if (beta <= alpha) {
+                            return bestScore;
+                        }
                     }
                 }
             }
@@ -93,14 +106,18 @@ public class ReverseEngineHard extends ReverseEngine {
         } else {
             int bestScore = Integer.MAX_VALUE;
 
-            for (int row = 0; row < boardSize; row++) {
-                for (int col = 0; col < boardSize; col++) {
-                    if (board[row][col] == 0) {
-                        board[row][col] = currentPlayer;
-                        int score = minimaxHelper(board, opponent, depth + 1, true);
-                        board[row][col] = 0;
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    if (board[row][col] == '-') {
+                        board[row][col] = 'X';
+                        int currentScore = minimax(board, depth - 1, true, alpha, beta);
+                        board[row][col] = '-';
+                        bestScore = Math.min(bestScore, currentScore);
+                        beta = Math.min(beta, bestScore);
 
-                        bestScore = Math.min(score, bestScore);
+                        if (beta <= alpha) {
+                            return bestScore;
+                        }
                     }
                 }
             }
@@ -109,58 +126,31 @@ public class ReverseEngineHard extends ReverseEngine {
         }
     }
 
-    private boolean checkWin(int[][] board, int player) {
-        // Check horizontal lines
-        for (int row = 0; row < boardSize; row++) {
-            boolean win = true;
-            for (int col = 0; col < boardSize; col++) {
-                if (board[row][col] != player) {
-                    win = false;
-                    break;
+
+    public int[] getMove(char[][] board) {
+        int bestScore = Integer.MIN_VALUE;
+        ArrayList<int[]> bestMoves = new ArrayList<>();
+
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                if (board[row][col] == '-') {
+                    char[][] copiedBoard = copyBoard(board);
+                    int maxDepth = 3;
+                    copiedBoard[row][col] = 'O';
+                    int currentScore = minimax(copiedBoard, maxDepth, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+                    if (currentScore > bestScore) {
+                        bestScore = currentScore;
+                        bestMoves.clear();
+                        bestMoves.add(new int[]{row, col});
+                    } else if (currentScore == bestScore) {
+                        bestMoves.add(new int[]{row, col});
+                    }
                 }
             }
-            if (win) {
-                return true;
-            }
         }
 
-        // Check vertical lines
-        for (int col = 0; col < boardSize; col++) {
-            boolean win = true;
-            for (int row = 0; row < boardSize; row++) {
-                if (board[row][col] != player) {
-                    win = false;
-                    break;
-                }
-            }
-            if (win) {
-                return true;
-            }
-        }
-
-        // Check diagonal lines
-        boolean win = true;
-        for (int i = 0; i < boardSize; i++) {
-            if (board[i][i] != player) {
-                win = false;
-                break;
-            }
-        }
-        if (win) {
-            return true;
-        }
-
-        win = true;
-        for (int i = 0; i < boardSize; i++) {
-            if (board[i][boardSize - 1 - i] != player) {
-                win = false;
-                break;
-            }
-        }
-        if (win) {
-            return true;
-        }
-
-        return false;
+        Random random = new Random();
+        return !bestMoves.isEmpty() ? bestMoves.get(random.nextInt(bestMoves.size())) : new int[]{0, 0};
     }
 }
