@@ -21,8 +21,8 @@ public class PlayerAccount implements Serializable {
 
 
     public PlayerAccount(String name, String enteredPassword){
-        name = username;
-        enteredPassword = password;
+        username=name;
+        password = enteredPassword;
     }
 
     public static String hashPassword(String password) {
