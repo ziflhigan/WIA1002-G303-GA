@@ -2,7 +2,6 @@
  *
  * @author Xiu Huan
  */
-import GameEngine.DifficultEngine;
 
 import java.util.Random;
 import java.util.Scanner;
@@ -19,17 +18,36 @@ public class TicTacToe {
         game1 = new TicTacToeRegular(playerAccount);
         game2 = new ReverseTicTacToe(playerAccount);
         game3 =  new Treblecross(playerAccount);
-        System.out.println("Sign Up or Log In? (0 : Sign Up, 1 : Log In)");
-        int num = in.nextInt();
-        in.nextLine();
-        if(num == 0) {
-            playerAccount.createAccount();
+
+        boolean success = false;
+        while (!success) {
+            System.out.println("Sign Up or Log In? (0 : Sign Up, 1 : Log In)");
+            String userIn = in.next();
+            try {
+                int choice = Integer.parseInt(userIn);
+                if (choice == 0 || choice == 1) {
+                    // proceed with signup or login
+                    success = true;
+
+                    int num = Integer.parseInt(userIn);
+                    in.nextLine();
+                    if(num == 0) {
+                        playerAccount.createAccount();
+                    }
+                    else if(num == 1) {
+                        playerAccount.login();
+                    }
+                    System.out.println();
+                    playerAccount.loadLeaderboard();
+
+                } else {
+                    System.out.println("Invalid input! Please enter either 0 or 1.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter an integer.");
+            }
         }
-        else if(num == 1) {
-            playerAccount.login();
-        }
-        System.out.println();
-        playerAccount.loadLeaderboard();
+
     }
 
     public boolean playGame() {
