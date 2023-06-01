@@ -3,7 +3,9 @@
  * @author Xiu Huan
  */
 import GameEngine.EngineInterface;
+import GameEngine.RegularEngineEasy;
 import GameEngine.RegularEngineHard;
+import GameEngine.RegularEngineMedium;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -29,12 +31,14 @@ public class TicTacToeRegular implements Serializable{
 
     public TicTacToeRegular(PlayerAccount playerAccount) {
 
-        Random rd = new Random();
-        int engNum = rd.nextInt(3);
+        Scanner in = new Scanner(System.in);
+        // int engNum = in.nextInt();
+        int engNum = 2;
+
         if (engNum == 0){
-            // Initialise the easy engine here
+            engine = new RegularEngineEasy();
         } else if (engNum == 1) {
-            // Initialise the medium engine here
+            engine = new RegularEngineMedium();
         }else {
             engine = new RegularEngineHard();
         }
