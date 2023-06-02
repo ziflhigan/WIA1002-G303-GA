@@ -31,24 +31,28 @@ public class TicTacToeRegular implements Serializable{
     EngineInterface engine ;
 
     public TicTacToeRegular(PlayerAccount playerAccount) {
-
-        Scanner in = new Scanner(System.in);
-        // int engNum = in.nextInt();
-        int engNum = 2;
-
-        if (engNum == 0){
-            engine = new RegularEngineEasy();
-        } else if (engNum == 1) {
-            engine = new RegularEngineMedium();
-        }else {
-            engine = new RegularEngineHard();
-        }
-
         this.playerAccount = playerAccount;
 
     }
 
     public boolean playgame(){
+
+        Random rd = new Random();
+        int engNum = rd.nextInt(3);
+
+        if (engNum == 0){
+            engine = new RegularEngineEasy();
+            System.out.println("You engine's difficulty is easy, you can do it!");
+
+        } else if (engNum == 1) {
+            engine = new RegularEngineMedium();
+            System.out.println("The engine's difficulty level is medium, good luck!");
+
+        }else {
+            engine = new RegularEngineHard();
+            System.out.println("The engine's difficulty is hard, try your best! ");
+        }
+
         printInstructions();
         char currentPlayer = player;
             // To make sure if 'draw' happens, the player needs to play again

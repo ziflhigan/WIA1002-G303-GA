@@ -3,10 +3,16 @@
  *
  * @author Xiu Huan
  */
+import GameEngine.EngineInterface;
+import GameEngine.ReverseEngineEasy;
+import GameEngine.ReverseEngineHard;
+import GameEngine.ReverseEngineMedium;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.util.Stack;
@@ -16,10 +22,11 @@ public class ReverseTicTacToe {
     private static char player = 'X';
     private static char computer = 'O';
     private static int numMoves = 0;
-    static test engine = new test();
+    //static test engine = new test();
     private static int round =1;
     private static int playermark =0;
     private static int enginemark =0;
+    EngineInterface engine;
 
     private static Stack<int[]> moves = new Stack<>();
     private static PlayerAccount playerAccount;
@@ -29,7 +36,26 @@ public class ReverseTicTacToe {
     }
 
     public boolean playgame(){
+
         printInstructions();
+
+        Random rd = new Random();
+        int engNum = rd.nextInt(3);
+
+        if (engNum == 0){
+            engine = new ReverseEngineEasy();
+            System.out.println("You engine's difficulty is easy, you can do it!");
+
+        } else if (engNum == 1) {
+            engine = new ReverseEngineMedium();
+            System.out.println("The engine's difficulty level is medium, good luck!");
+
+        }else {
+            engine = new ReverseEngineHard();
+            System.out.println("The engine's difficulty is hard, try your best! ");
+
+        }
+
         char currentPlayer = player;
         while(true){
             initializeBoard();
@@ -134,6 +160,8 @@ public class ReverseTicTacToe {
                         System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
                         if (scanner.nextInt() == 1){
                             takeBackMove();
+                            takeBackMove();
+                            System.out.println("Both of the player and Engine's move have been taken back");
                             continue;
                         }
 
@@ -157,7 +185,7 @@ public class ReverseTicTacToe {
                             break;
                     }
 
-                    System.out.print("Enter your move (row[1-5] column[1-5]): ");
+                    System.out.print("Enter your move (row[1-3] column[1-3]): ");
                     row = scanner.nextInt() - 1;
                     col = scanner.nextInt() - 1;
 
@@ -179,7 +207,7 @@ public class ReverseTicTacToe {
         }
         else{
             System.out.println("Engine turns.");
-            int[] enginemove = engine.getinput(currentPlayer, board, 3);
+            int[] enginemove = engine.getMove(board);
             row  = enginemove[0];
             col = enginemove[1];
         }
@@ -312,7 +340,7 @@ public class ReverseTicTacToe {
             path = Paths.get( fileName);
         }
 
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream( fileName))) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream( "UserSaveGames\\" + fileName))) {
             out.writeObject(gameState);
             System.out.println("Game saved successfully!");
         } catch (IOException e) {
@@ -326,7 +354,7 @@ public class ReverseTicTacToe {
         System.out.println("Enter a file name to load");
         String fileName = sc.nextLine() + ".ser";
         GameState loadedState = null;
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream( fileName))) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("UserSaveGames\\" + fileName))) {
             loadedState = (GameState) in.readObject();
 
             // Check game version
