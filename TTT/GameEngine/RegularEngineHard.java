@@ -146,7 +146,7 @@ public class RegularEngineHard implements EngineInterface{
             for (int col = 0; col < 5; col++) {
                 if (board[row][col] == '-') {
                     char[][] copiedBoard = copyBoard(board);
-                    int maxDepth = 5;
+                    int maxDepth = 7;
                     copiedBoard[row][col] = 'O';
                     int currentScore = minimax(copiedBoard, maxDepth, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
 

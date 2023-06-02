@@ -20,41 +20,55 @@ public class RegularEngineMedium implements EngineInterface {
     private int evaluateBoard(char[][] board) {
         int score = 0;
 
-        // Check rows
-        for (int i = 0; i < 3; i++) {
-            if (board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
-                if (board[i][0] == 'O') {
-                    score = 1;
-                } else if (board[i][0] == 'X') {
-                    score = -1;
+        // Check rows and columns
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 3; j++) {
+                // Rows
+                if (board[i][j] == board[i][j + 1] && board[i][j] == board[i][j + 2]) {
+                    if (board[i][j] == 'O') {
+                        score = 1;
+                        break;
+                    } else if (board[i][j] == 'X') {
+                        score = -1;
+                        break;
+                    }
                 }
-            }
-        }
 
-        // Check columns
-        for (int i = 0; i < 3; i++) {
-            if (board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
-                if (board[0][i] == 'O') {
-                    score = 1;
-                } else if (board[0][i] == 'X') {
-                    score = -1;
+                // Columns
+                if (board[j][i] == board[j + 1][i] && board[j][i] == board[j + 2][i]) {
+                    if (board[j][i] == 'O') {
+                        score = 1;
+                        break;
+                    } else if (board[j][i] == 'X') {
+                        score = -1;
+                        break;
+                    }
                 }
             }
         }
 
         // Check diagonals
-        if (board[0][0] == board[1][1] && board[0][0] == board[2][2]) {
-            if (board[0][0] == 'O') {
-                score = 1;
-            } else if (board[0][0] == 'X') {
-                score = -1;
-            }
-        }
-        if (board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
-            if (board[0][2] == 'O') {
-                score = 1;
-            } else if (board[0][2] == 'X') {
-                score = -1;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == board[i + 1][j + 1] && board[i][j] == board[i + 2][j + 2]) {
+                    if (board[i][j] == 'O') {
+                        score = 1;
+                        break;
+                    } else if (board[i][j] == 'X') {
+                        score = -1;
+                        break;
+                    }
+                }
+
+                if (board[i][4 - j] == board[i + 1][3 - j] && board[i][4 - j] == board[i + 2][2 - j]) {
+                    if (board[i][4 - j] == 'O') {
+                        score = 1;
+                        break;
+                    } else if (board[i][4 - j] == 'X') {
+                        score = -1;
+                        break;
+                    }
+                }
             }
         }
 
@@ -110,7 +124,7 @@ public class RegularEngineMedium implements EngineInterface {
                 if (board[row][col] == '-') {
                     char[][] copiedBoard = copyBoard(board);
                     copiedBoard[row][col] = 'O';
-                    int currentScore = minimax(copiedBoard, 5, false);
+                    int currentScore = minimax(copiedBoard, 4, false);
 
                     if (currentScore > bestScore) {
                         bestScore = currentScore;

@@ -31,50 +31,49 @@ public class ReverseEngineHard implements EngineInterface{
 
     private int evaluateBoard(char[][] board) {
         int score = 0;
-    
+
         // Check rows and columns
         for (int i = 0; i < 3; i++) {
             if (board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
                 if (board[i][0] == 'O') {
-                    score = 1;
+                    score = -1; // Change to -1
                     break;
                 } else if (board[i][0] == 'X') {
-                    score = -1;
+                    score = 1; // Change to 1
                     break;
                 }
             }
-    
+
             if (board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
                 if (board[0][i] == 'O') {
-                    score = 1;
+                    score = -1; // Change to -1
                     break;
                 } else if (board[0][i] == 'X') {
-                    score = -1;
+                    score = 1; // Change to 1
                     break;
                 }
             }
         }
-    
+
         // Check diagonals
         if (board[0][0] == board[1][1] && board[0][0] == board[2][2]) {
             if (board[0][0] == 'O') {
-                score = 1;
+                score = -1; // Change to -1
             } else if (board[0][0] == 'X') {
-                score = -1;
+                score = 1; // Change to 1
             }
         }
-    
+
         if (board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
             if (board[0][2] == 'O') {
-                score = 1;
+                score = -1; // Change to -1
             } else if (board[0][2] == 'X') {
-                score = -1;
+                score = 1; // Change to 1
             }
         }
-    
+
         return score;
     }
-    
 
     private int minimax(char[][] board, int depth, boolean isMaximizingPlayer, int alpha, int beta) {
         int score = evaluateBoard(board);
@@ -135,7 +134,7 @@ public class ReverseEngineHard implements EngineInterface{
             for (int col = 0; col < 3; col++) {
                 if (board[row][col] == '-') {
                     char[][] copiedBoard = copyBoard(board);
-                    int maxDepth = 3;
+                    int maxDepth = 5;
                     copiedBoard[row][col] = 'O';
                     int currentScore = minimax(copiedBoard, maxDepth, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
