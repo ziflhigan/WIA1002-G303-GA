@@ -1,7 +1,3 @@
-/**
- * @Author Xiu Huan
- */
-
 import GameEngine.EngineInterface;
 import GameEngine.ReverseEngineEasy;
 import GameEngine.ReverseEngineHard;
@@ -12,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
-import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.Stack;
 
@@ -21,9 +16,9 @@ public class ReverseTicTacToe {
     private static char player = 'X';
     private static char computer = 'O';
     private static int numMoves = 0;
-    private static int round =1;
-    private static int playermark =0;
-    private static int enginemark =0;
+    private static int round = 1;
+    private static int playermark = 0;
+    private static int enginemark = 0;
     EngineInterface engine;
 
     private static Stack<int[]> moves = new Stack<>();
@@ -33,7 +28,7 @@ public class ReverseTicTacToe {
         this.playerAccount = playerAccount;
     }
 
-    public boolean playgame(){
+    public boolean playgame() {
 
         String gameMode = getGameMode();
         switch (gameMode) {
@@ -44,39 +39,38 @@ public class ReverseTicTacToe {
         }
     }
 
-    public boolean playPVE(){
-        Random rd = new Random();
-        int engNum = rd.nextInt(3);
-        printInstructions();
+    public boolean playPVE() {
 
-        if(engNum ==0){
+        printInstructions();
+        String engNum = getDifficulty();
+        System.out.println();
+
+        if (engNum.equals("0")) {
             this.engine = new ReverseEngineEasy();
             System.out.println("You engine's difficulty is easy, you can do it!");
-        }
-        else if (engNum == 1){
+        } else if (engNum.equals("1")) {
             this.engine = new ReverseEngineMedium();
             System.out.println("The engine's difficulty level is medium, good luck!");
-        }
-        else {
+        } else {
             this.engine = new ReverseEngineHard();
             System.out.println("The engine's difficulty is hard, try your best! ");
         }
 
         char currentPlayer = player;
 
-        while(true){
+        while (true) {
             initializeBoard();
-            numMoves =0;
+            numMoves = 0;
             System.out.println("\nRound " + round);
 
-            while(true){
+            while (true) {
 
                 double[] probabilities = getWinProbability();
                 System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
                 System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
 
                 printBoard();
-                int[] move = getValidMove(currentPlayer,false);
+                int[] move = getValidMove(currentPlayer, false);
                 board[move[0]][move[1]] = currentPlayer;
                 numMoves++;
 
@@ -84,27 +78,25 @@ public class ReverseTicTacToe {
                     printBoard();
                     currentPlayer = switchPlayer(currentPlayer);
 
-                    if(currentPlayer == 'X'){
+                    if (currentPlayer == 'X') {
                         playermark++;
-                        System.out.println(playerAccount.getUsername()+" wins!");
-                    }
-                    else{
+                        System.out.println(playerAccount.getUsername() + " wins!");
+                    } else {
                         enginemark++;
                         System.out.println("Engine wins!");
                     }
-                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
+                    System.out.println(playerAccount.getUsername() + "\t:\tEngine");
                     System.out.println(playermark + "\t:\t" + enginemark);
-                    round ++;
+                    round++;
 
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
                     playerAccount.updateLeaderboard("Engine", enginemark);
 
                     moves.clear();
                     return currentPlayer == 'X';
-                }
-                else if (numMoves == 9) {
+                } else if (numMoves == 9) {
                     System.out.println("It's a draw!");
-                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
+                    System.out.println(playerAccount.getUsername() + "\t:\tEngine");
                     System.out.println(playermark + "\t:\t" + enginemark);
                     System.out.println("Play again!");
                     round++;
@@ -115,14 +107,12 @@ public class ReverseTicTacToe {
                     moves.clear();
 
                     break;
-                }
-                else {
+                } else {
                     currentPlayer = switchPlayer(currentPlayer);
                 }
             }
         }
     }
-
 
     private static void initializeBoard() {
         for (int i = 0; i < 3; i++) {
@@ -132,23 +122,23 @@ public class ReverseTicTacToe {
         }
     }
 
-    public boolean playPVP(){
+    public boolean playPVP() {
         printInstructions();
 
         char currentPlayer = player;
-        while(true){
+        while (true) {
             initializeBoard();
-            numMoves =0;
+            numMoves = 0;
             System.out.println("\nRound " + round);
 
-            while(true){
+            while (true) {
 
                 double[] probabilities = getWinProbability();
                 System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
                 System.out.println("Second player's win probability: " + probabilities[1] * 100 + "%");
 
                 printBoard();
-                int[] move = getValidMove(currentPlayer,true);
+                int[] move = getValidMove(currentPlayer, true);
                 board[move[0]][move[1]] = currentPlayer;
                 numMoves++;
 
@@ -156,27 +146,25 @@ public class ReverseTicTacToe {
                     printBoard();
                     currentPlayer = switchPlayer(currentPlayer);
 
-                    if(currentPlayer=='X'){
+                    if (currentPlayer == 'X') {
                         playermark++;
-                        System.out.println(playerAccount.getUsername()+" wins!");
-                    }
-                    else{
+                        System.out.println(playerAccount.getUsername() + " wins!");
+                    } else {
                         enginemark++;
                         System.out.println("Second player wins!");
                     }
-                    System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                    System.out.println(playerAccount.getUsername() + "\t:\tSecond Player");
                     System.out.println(playermark + "\t:\t" + enginemark);
-                    round ++;
+                    round++;
 
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
                     playerAccount.updateLeaderboard("Second Player", enginemark);
 
                     moves.clear();
                     return currentPlayer == 'X';
-                }
-                else if (numMoves == 9) {
+                } else if (numMoves == 9) {
                     System.out.println("It's a draw!");
-                    System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                    System.out.println(playerAccount.getUsername() + "\t:\tSecond Player");
                     System.out.println(playermark + "\t:\t" + enginemark);
                     System.out.println("\nPlay again!");
                     round++;
@@ -187,8 +175,7 @@ public class ReverseTicTacToe {
                     moves.clear();
                     break;
 
-                }
-                else {
+                } else {
                     currentPlayer = switchPlayer(currentPlayer);
                 }
             }
@@ -198,8 +185,9 @@ public class ReverseTicTacToe {
 
     private static void printInstructions() {
         System.out.println("Welcome to Reverse Tic-Tac-Toe!");
-        System.out.println("The rules are simple: the loser is the first player to place 3 of their shape in either a horizontal, vertical, or diagonal row.");
-        System.out.println(playerAccount.getUsername()+" : X, Engine : O");
+        System.out.println(
+                "The rules are simple: the loser is the first player to place 3 of their shape in either a horizontal, vertical, or diagonal row.");
+        System.out.println(playerAccount.getUsername() + " : X, Engine : O");
         System.out.println("Let's start the game!");
         System.out.println();
     }
@@ -220,28 +208,29 @@ public class ReverseTicTacToe {
         int col = -1;
         boolean validMove = false;
 
-        if(currentPlayer == 'X'){
+        if (currentPlayer == 'X') {
             while (!validMove) {
                 try {
 
-                    if (!moves.isEmpty()){
+                    if (!moves.isEmpty()) {
                         System.out.println("Do you want to take back a move? (1: Yes, Other Numbers: No)");
-                        if (scanner.nextInt() == 1){
+                        if (scanner.nextInt() == 1) {
                             takeBackMove();
                             takeBackMove();
                             System.out.println("Both of the player and Engine's move have been taken back");
                             continue;
                         }
 
-                    }else {
+                    } else {
                         System.out.println("No more moves left to be taken back, please make a move");
                     }
 
-                    System.out.println(playerAccount.getUsername()+"\s turn \n 1. Make a move\n 2. Save game\n 3. Load game\n");
+                    System.out.println(
+                            playerAccount.getUsername() + "\s turn \n 1. Make a move\n 2. Save game\n 3. Load game\n");
                     int choices = scanner.nextInt();
                     scanner.nextLine();
 
-                    switch (choices){
+                    switch (choices) {
                         case 1:
                             break;
                         case 2:
@@ -262,7 +251,7 @@ public class ReverseTicTacToe {
                             System.out.println("Invalid move: cell is already occupied");
                         } else {
                             board[row][col] = currentPlayer;
-                            validMove= true;
+                            validMove = true;
                         }
                     } else {
                         System.out.println("Invalid move: row and column must be between 1 and 3");
@@ -272,28 +261,27 @@ public class ReverseTicTacToe {
                     scanner.nextLine(); // consume the invalid input
                 }
             }
-        }
-        else{
+        } else {
 
-            if(isHuman){
+            if (isHuman) {
                 int[] newMove = getMoveSecondPlayer();
                 row = newMove[0];
                 col = newMove[1];
 
-            }else{
+            } else {
                 System.out.println("Engine turns.");
                 int[] enginemove = engine.getMove(board);
-                row  = enginemove[0];
+                row = enginemove[0];
                 col = enginemove[1];
             }
 
         }
-        int[] move = {row, col};
+        int[] move = { row, col };
         moves.push(move);
         return move;
     }
 
-    private int[] getMoveSecondPlayer(){
+    private int[] getMoveSecondPlayer() {
         Scanner sc = new Scanner(System.in);
         int row = -1;
         int col = -1;
@@ -311,7 +299,7 @@ public class ReverseTicTacToe {
                         System.out.println("Invalid move: cell is already occupied");
                     } else {
                         board[row][col] = 'O';
-                        validMove= true;
+                        validMove = true;
                     }
                 } else {
                     System.out.println("Invalid move: row and column must be between 1 and 3");
@@ -321,13 +309,14 @@ public class ReverseTicTacToe {
                 sc.nextLine(); // consume the invalid input
             }
         }
-        int[] move = {row, col};
+        int[] move = { row, col };
         return move;
 
     }
 
     public boolean checkWin(char currentSymbol) {
-        return (checkRowsForWin(currentSymbol) || checkColumnsForWin(currentSymbol) || checkDiagonalsForWin(currentSymbol));
+        return (checkRowsForWin(currentSymbol) || checkColumnsForWin(currentSymbol)
+                || checkDiagonalsForWin(currentSymbol));
     }
 
     private static char switchPlayer(char currentPlayer) {
@@ -381,22 +370,23 @@ public class ReverseTicTacToe {
 
         return score;
     }
+
     private static int getScore(char player) {
         int score = 0;
 
         // Check rows
         for (int i = 0; i < 3; i++) {
-            score += getLineScore(new char[]{board[i][0], board[i][1], board[i][2]}, player);
+            score += getLineScore(new char[] { board[i][0], board[i][1], board[i][2] }, player);
         }
 
         // Check columns
         for (int i = 0; i < 3; i++) {
-            score += getLineScore(new char[]{board[0][i], board[1][i], board[2][i]}, player);
+            score += getLineScore(new char[] { board[0][i], board[1][i], board[2][i] }, player);
         }
 
         // Check diagonals
-        score += getLineScore(new char[]{board[0][0], board[1][1], board[2][2]}, player);
-        score += getLineScore(new char[]{board[0][2], board[1][1], board[2][0]}, player);
+        score += getLineScore(new char[] { board[0][0], board[1][1], board[2][2] }, player);
+        score += getLineScore(new char[] { board[0][2], board[1][1], board[2][0] }, player);
 
         return score;
     }
@@ -410,7 +400,7 @@ public class ReverseTicTacToe {
         double playerProbability = (double) playerScore / totalScore;
         double engineProbability = (double) engineScore / totalScore;
 
-        return new double[]{playerProbability, engineProbability};
+        return new double[] { playerProbability, engineProbability };
     }
 
     private static void takeBackMove() {
@@ -430,7 +420,7 @@ public class ReverseTicTacToe {
 
     private void saveGame() {
 
-        if (numMoves == 0){
+        if (numMoves == 0) {
             System.out.println("There are no any moves yet, make a move!");
             return;
         }
@@ -440,17 +430,17 @@ public class ReverseTicTacToe {
         System.out.println("Enter a file name to be saved (No suffix)");
         String fileName = sc.nextLine() + ".ser";
 
-
         // Check the file already exits or not
-        Path path = Paths.get( fileName);
+        Path path = Paths.get(fileName);
         while (Files.exists(path)) {
             Scanner scanner = new Scanner(System.in);
-            System.out.println("A saved game with this file name already exists. Please enter a different name for the saved game file.");
+            System.out.println(
+                    "A saved game with this file name already exists. Please enter a different name for the saved game file.");
             fileName = scanner.nextLine();
-            path = Paths.get( fileName);
+            path = Paths.get(fileName);
         }
 
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream( "UserSaveGames\\" + fileName))) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("UserSaveGames\\" + fileName))) {
             out.writeObject(gameState);
             System.out.println("Game saved successfully!");
         } catch (IOException e) {
@@ -469,7 +459,8 @@ public class ReverseTicTacToe {
 
             // Check game version
             if (!loadedState.getGameVersion().equals(currentGameVersion)) {
-                System.out.println("The loaded game is not compatible with the current version of Tic Tac Toe. Please load a compatible saved game.");
+                System.out.println(
+                        "The loaded game is not compatible with the current version of Tic Tac Toe. Please load a compatible saved game.");
                 return;
             }
 
@@ -503,5 +494,24 @@ public class ReverseTicTacToe {
         }
     }
 
+    public String getDifficulty() {
+        Scanner scanner = new Scanner(System.in);
+        String difficulty = "";
+
+        System.out.println("Choose game difficulty: ");
+        System.out.println("0. Easy");
+        System.out.println("1. Medium");
+        System.out.println("Default: Hard");
+
+        difficulty = scanner.nextLine();
+        switch (difficulty) {
+            case "0":
+                return "0";
+            case "1":
+                return "1";
+            default:
+                return "hard";
+        }
+    }
 
 }

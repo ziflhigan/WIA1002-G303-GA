@@ -38,15 +38,13 @@ public class Treblecross {
     }
 
     public boolean playPVE(){
-        Random rd = new Random();
-        int engNum = rd.nextInt(3);
         printInstructions();
+        String engNum = getGameMode();
 
-        if (engNum == 0){
+        if (engNum.equals("0")) {
             this.engine = new TrebleCrossEngineEasy();
             System.out.println("You engine's difficulty is easy, you can do it!");
-        }
-        else if (engNum == 1){
+        } else if (engNum.equals("1")) {
             this.engine = new TrebleCrossEngineMedium();
             System.out.println("The engine's difficulty level is medium, good luck!");
         }
@@ -419,6 +417,26 @@ public class Treblecross {
             default:
                 System.out.println("Invalid choice, defaulting to PVE");
                 return "PVE";
+        }
+    }
+
+    public String getDifficulty() {
+        Scanner scanner = new Scanner(System.in);
+        String difficulty = "";
+
+        System.out.println("Choose game difficulty: ");
+        System.out.println("0. Easy");
+        System.out.println("1. Medium");
+        System.out.println("Default: Hard");
+
+        difficulty = scanner.nextLine();
+        switch (difficulty) {
+            case "0":
+                return "0";
+            case "1":
+                return "1";
+            default:
+                return "hard";
         }
     }
 
