@@ -1,8 +1,7 @@
-
 /**
- *
- * @author Xiu Huan
+ * @Author Xiu Huan
  */
+
 import GameEngine.EngineInterface;
 import GameEngine.ReverseEngineEasy;
 import GameEngine.ReverseEngineHard;
@@ -12,8 +11,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Random;
 import java.util.Scanner;
+import java.util.Random;
 import java.util.InputMismatchException;
 import java.util.Stack;
 
@@ -22,7 +21,6 @@ public class ReverseTicTacToe {
     private static char player = 'X';
     private static char computer = 'O';
     private static int numMoves = 0;
-    //static test engine = new test();
     private static int round =1;
     private static int playermark =0;
     private static int enginemark =0;
@@ -37,40 +35,48 @@ public class ReverseTicTacToe {
 
     public boolean playgame(){
 
-        printInstructions();
+        String gameMode = getGameMode();
+        switch (gameMode) {
+            case "PVP":
+                return playPVP();
+            default:
+                return playPVE();
+        }
+    }
 
+    public boolean playPVE(){
         Random rd = new Random();
         int engNum = rd.nextInt(3);
+        printInstructions();
 
-        if (engNum == 0){
-            engine = new ReverseEngineEasy();
+        if(engNum ==0){
+            this.engine = new ReverseEngineEasy();
             System.out.println("You engine's difficulty is easy, you can do it!");
-
-        } else if (engNum == 1) {
-            engine = new ReverseEngineMedium();
+        }
+        else if (engNum == 1){
+            this.engine = new ReverseEngineMedium();
             System.out.println("The engine's difficulty level is medium, good luck!");
-
-        }else {
-            engine = new ReverseEngineHard();
+        }
+        else {
+            this.engine = new ReverseEngineHard();
             System.out.println("The engine's difficulty is hard, try your best! ");
-
         }
 
         char currentPlayer = player;
+
         while(true){
             initializeBoard();
             numMoves =0;
             System.out.println("\nRound " + round);
-            boolean endRound = false;
 
-            while (!endRound) {
+            while(true){
 
                 double[] probabilities = getWinProbability();
                 System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
                 System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
 
                 printBoard();
-                int[] move = getValidMove(currentPlayer);
+                int[] move = getValidMove(currentPlayer,false);
                 board[move[0]][move[1]] = currentPlayer;
                 numMoves++;
 
@@ -78,9 +84,9 @@ public class ReverseTicTacToe {
                     printBoard();
                     currentPlayer = switchPlayer(currentPlayer);
 
-                    if(currentPlayer =='X'){
+                    if(currentPlayer == 'X'){
                         playermark++;
-                        System.out.println(currentPlayer + " wins!");
+                        System.out.println(playerAccount.getUsername()+" wins!");
                     }
                     else{
                         enginemark++;
@@ -88,7 +94,6 @@ public class ReverseTicTacToe {
                     }
                     System.out.println(playerAccount.getUsername()+"\t:\tEngine");
                     System.out.println(playermark + "\t:\t" + enginemark);
-                    endRound = true;
                     round ++;
 
                     playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
@@ -115,7 +120,6 @@ public class ReverseTicTacToe {
                     currentPlayer = switchPlayer(currentPlayer);
                 }
             }
-
         }
     }
 
@@ -125,6 +129,70 @@ public class ReverseTicTacToe {
             for (int j = 0; j < 3; j++) {
                 board[i][j] = '-';
             }
+        }
+    }
+
+    public boolean playPVP(){
+        printInstructions();
+
+        char currentPlayer = player;
+        while(true){
+            initializeBoard();
+            numMoves =0;
+            System.out.println("\nRound " + round);
+
+            while(true){
+
+                double[] probabilities = getWinProbability();
+                System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
+                System.out.println("Second player's win probability: " + probabilities[1] * 100 + "%");
+
+                printBoard();
+                int[] move = getValidMove(currentPlayer,true);
+                board[move[0]][move[1]] = currentPlayer;
+                numMoves++;
+
+                if (checkWin(currentPlayer)) {
+                    printBoard();
+                    currentPlayer = switchPlayer(currentPlayer);
+
+                    if(currentPlayer=='X'){
+                        playermark++;
+                        System.out.println(playerAccount.getUsername()+" wins!");
+                    }
+                    else{
+                        enginemark++;
+                        System.out.println("Second player wins!");
+                    }
+                    System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                    System.out.println(playermark + "\t:\t" + enginemark);
+                    round ++;
+
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Second Player", enginemark);
+
+                    moves.clear();
+                    return currentPlayer == 'X';
+                }
+                else if (numMoves == 9) {
+                    System.out.println("It's a draw!");
+                    System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                    System.out.println(playermark + "\t:\t" + enginemark);
+                    System.out.println("\nPlay again!");
+                    round++;
+
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Second Player", enginemark);
+                    // Clear the history stack for the next round
+                    moves.clear();
+                    break;
+
+                }
+                else {
+                    currentPlayer = switchPlayer(currentPlayer);
+                }
+            }
+
         }
     }
 
@@ -146,7 +214,7 @@ public class ReverseTicTacToe {
         System.out.println();
     }
 
-    private int[] getValidMove(char currentPlayer) {
+    private int[] getValidMove(char currentPlayer, boolean isHuman) {
         Scanner scanner = new Scanner(System.in);
         int row = -1;
         int col = -1;
@@ -206,18 +274,60 @@ public class ReverseTicTacToe {
             }
         }
         else{
-            System.out.println("Engine turns.");
-            int[] enginemove = engine.getMove(board);
-            row  = enginemove[0];
-            col = enginemove[1];
+
+            if(isHuman){
+                int[] newMove = getMoveSecondPlayer();
+                row = newMove[0];
+                col = newMove[1];
+
+            }else{
+                System.out.println("Engine turns.");
+                int[] enginemove = engine.getMove(board);
+                row  = enginemove[0];
+                col = enginemove[1];
+            }
+
         }
         int[] move = {row, col};
         moves.push(move);
         return move;
     }
 
-    public boolean checkWin(char currentPlayer) {
-        return (checkRowsForWin(currentPlayer) || checkColumnsForWin(currentPlayer) || checkDiagonalsForWin(currentPlayer));
+    private int[] getMoveSecondPlayer(){
+        Scanner sc = new Scanner(System.in);
+        int row = -1;
+        int col = -1;
+        boolean validMove = false;
+
+        while (!validMove) {
+            try {
+
+                System.out.print("Second player, enter your move (row[1-3] column[1-3]): ");
+                row = sc.nextInt() - 1;
+                col = sc.nextInt() - 1;
+
+                if (row >= 0 && row < 3 && col >= 0 && col < 3) {
+                    if (board[row][col] != '-') {
+                        System.out.println("Invalid move: cell is already occupied");
+                    } else {
+                        board[row][col] = 'O';
+                        validMove= true;
+                    }
+                } else {
+                    System.out.println("Invalid move: row and column must be between 1 and 3");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter integers.");
+                sc.nextLine(); // consume the invalid input
+            }
+        }
+        int[] move = {row, col};
+        return move;
+
+    }
+
+    public boolean checkWin(char currentSymbol) {
+        return (checkRowsForWin(currentSymbol) || checkColumnsForWin(currentSymbol) || checkDiagonalsForWin(currentSymbol));
     }
 
     private static char switchPlayer(char currentPlayer) {
@@ -363,12 +473,12 @@ public class ReverseTicTacToe {
                 return;
             }
 
-            this.board = loadedState.board;
-            this.numMoves = loadedState.numMoves;
-            this.round = loadedState.round;
-            this.playermark = loadedState.playerMark;
-            this.enginemark = loadedState.engineMark;
-            this.playerAccount = loadedState.playerAccount;
+            board = loadedState.board;
+            numMoves = loadedState.numMoves;
+            round = loadedState.round;
+            playermark = loadedState.playerMark;
+            enginemark = loadedState.engineMark;
+            playerAccount = loadedState.playerAccount;
             System.out.println("Game loaded successfully!");
             System.out.println("The game was played by:" + playerAccount.getUsername());
         } catch (IOException | ClassNotFoundException e) {
@@ -376,5 +486,22 @@ public class ReverseTicTacToe {
         }
     }
 
-}
+    public String getGameMode() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Choose game mode: ");
+        System.out.println("1. Player vs Player (PVP)");
+        System.out.println("2. Player vs Engine (PVE)");
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1:
+                return "PVP";
+            case 2:
+                return "PVE";
+            default:
+                System.out.println("Invalid choice, defaulting to PVE");
+                return "PVE";
+        }
+    }
 
+
+}

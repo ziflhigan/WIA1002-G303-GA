@@ -1,11 +1,8 @@
 /**
- *
  * @author Xiu Huan
  */
-import GameEngine.EngineInterface;
-import GameEngine.RegularEngineEasy;
-import GameEngine.RegularEngineHard;
-import GameEngine.RegularEngineMedium;
+
+import GameEngine.*;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -27,7 +24,7 @@ public class TicTacToeRegular implements Serializable{
     private static int enginemark =0;
     private static Stack<Integer> historyMoveRow, historyMoveCol;
     private static PlayerAccount playerAccount;
-    
+
     EngineInterface engine ;
 
     public TicTacToeRegular(PlayerAccount playerAccount) {
@@ -37,8 +34,20 @@ public class TicTacToeRegular implements Serializable{
 
     public boolean playgame(){
 
+        String gameMode = getGameMode();
+        switch (gameMode) {
+            case "PVP":
+                return playPVP();
+            default:
+                return playPVE();
+        }
+    }
+
+    public boolean playPVE(){
         Random rd = new Random();
         int engNum = rd.nextInt(3);
+        printInstructions();
+
 
         if (engNum == 0){
             engine = new RegularEngineEasy();
@@ -53,69 +62,66 @@ public class TicTacToeRegular implements Serializable{
             System.out.println("The engine's difficulty is hard, try your best! ");
         }
 
-        printInstructions();
         char currentPlayer = player;
-            // To make sure if 'draw' happens, the player needs to play again
-            while(true){
-                initializeBoard();
-                numMoves=0;
-                //System.out.println("\nRound " + round);
-                boolean endRound = false;
+        // To make sure if 'draw' happens, the player needs to play again
+        while(true){
+            initializeBoard();
+            numMoves=0;
+            System.out.println("\nRound " + round);
 
+            while (true) {
+                double[] probabilities = getWinProbability();
+                System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
+                System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
 
-                while (!endRound) {
-                    double[] probabilities = getWinProbability();
-                    System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
-                    System.out.println("Engine's win probability: " + probabilities[1] * 100 + "%");
+                printBoard();
+                int[] move = getValidMove(currentPlayer, false);
+                board[move[0]][move[1]] = currentPlayer;
+                numMoves++;
 
+                if(checkWin()){
                     printBoard();
-                    int[] move = getValidMove(currentPlayer);
-                    board[move[0]][move[1]] = currentPlayer;
-                    numMoves++;
 
-                    if(checkWin()){
-                        printBoard();
-
-                        if(currentPlayer =='X'){
-                            playermark++;
-                            System.out.println(playerAccount.getUsername()+" wins!");
-                        }
-                        else{
-                            enginemark++;
-                            System.out.println("Engine wins!");
-                        }
-
-                        System.out.println(playerAccount.getUsername()+"\t:\tEngine");
-                        System.out.println(playermark + "\t:\t" + enginemark);
-                        round++;
-
-                        playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
-                        playerAccount.updateLeaderboard("Engine", enginemark);
-
-                        historyMoveRow.clear();
-                        historyMoveCol.clear();
-                        return currentPlayer == 'X';
+                    if(currentPlayer =='X'){
+                        playermark++;
+                        System.out.println(playerAccount.getUsername()+" wins!");
                     }
-                    else if (numMoves == 25) {
-                        System.out.println("It's a draw!");
-                        System.out.println(playerAccount.getUsername()+"\t:\tEngine");
-                        System.out.println(playermark + "\t:\t" + enginemark);
-                        System.out.println("Play again!");
-                        round++;
-
-                        playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
-                        playerAccount.updateLeaderboard("Engine", enginemark);
-
-                        historyMoveRow.clear();
-                        historyMoveCol.clear();
-                        break;
+                    else{
+                        enginemark++;
+                        System.out.println("Engine wins!");
                     }
-                    else {
-                        currentPlayer = switchPlayer(currentPlayer);
-                    }
+
+                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
+                    System.out.println(playermark + "\t:\t" + enginemark);
+                    round++;
+
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Engine", enginemark);
+
+                    historyMoveRow.clear();
+                    historyMoveCol.clear();
+                    return currentPlayer == 'X';
                 }
+                else if (numMoves == 25) {
+                    System.out.println("It's a draw!");
+                    System.out.println(playerAccount.getUsername()+"\t:\tEngine");
+                    System.out.println(playermark + "\t:\t" + enginemark);
+                    System.out.println("Play again!");
+                    round++;
 
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Engine", enginemark);
+
+                    historyMoveRow.clear();
+                    historyMoveCol.clear();
+                    break;
+                }
+                else {
+                    currentPlayer = switchPlayer(currentPlayer);
+                }
             }
+
+        }
     }
 
     private static void initializeBoard() {
@@ -126,6 +132,70 @@ public class TicTacToeRegular implements Serializable{
         }
         historyMoveRow = new Stack<>();
         historyMoveCol = new Stack<>();
+    }
+
+    public boolean playPVP(){
+        printInstructions();
+        char currentPlayer = player;
+
+        while(true){
+            initializeBoard();
+            numMoves=0;
+            System.out.println("\nRound " + round);
+
+            while (true) {
+                double[] probabilities = getWinProbability();
+                System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
+                System.out.println("Second player's win probability: " + probabilities[1] * 100 + "%");
+
+                printBoard();
+                int[] move = getValidMove(currentPlayer, true);
+                board[move[0]][move[1]] = currentPlayer;
+                numMoves++;
+
+                if(checkWin()){
+                    printBoard();
+
+                    if(currentPlayer =='X'){
+                        playermark++;
+                        System.out.println(playerAccount.getUsername()+" wins!");
+                    }
+                    else{
+                        enginemark++;
+                        System.out.println("Second player wins!");
+                    }
+
+                    System.out.println(playerAccount.getUsername()+"\t:\tSecond player");
+                    System.out.println(playermark + "\t:\t" + enginemark);
+                    round++;
+
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Second player", enginemark);
+
+                    historyMoveRow.clear();
+                    historyMoveCol.clear();
+                    return currentPlayer == 'X';
+                }
+                else if (numMoves == 25) {
+                    System.out.println("It's a draw!");
+                    System.out.println(playerAccount.getUsername()+"\t:\tSecond Player");
+                    System.out.println(playermark + "\t:\t" + enginemark);
+                    System.out.println("Play again!");
+                    round++;
+
+                    playerAccount.updateLeaderboard(playerAccount.getUsername(), playermark);
+                    playerAccount.updateLeaderboard("Second Player", enginemark);
+
+                    historyMoveRow.clear();
+                    historyMoveCol.clear();
+                    break;
+                }
+                else {
+                    currentPlayer = switchPlayer(currentPlayer);
+                }
+            }
+
+        }
     }
 
     private static void printInstructions() {
@@ -148,7 +218,7 @@ public class TicTacToeRegular implements Serializable{
         System.out.println();
     }
 
-    private int[] getValidMove(char currentPlayer) {
+    private int[] getValidMove(char currentPlayer, boolean isHuman) {
         Scanner scanner = new Scanner(System.in);
         int row = -1;
         int col = -1;
@@ -178,8 +248,8 @@ public class TicTacToeRegular implements Serializable{
                         case 1:
                             break;
                         case 2:
-                           saveGame();
-                           break;
+                            saveGame();
+                            break;
                         case 3:
                             loadGame("Regular");
                             printBoard();
@@ -194,12 +264,6 @@ public class TicTacToeRegular implements Serializable{
                         if (board[row][col] != '-') {
                             System.out.println("Invalid move: cell is already occupied");
                         } else {
-
-                            if (board[row][col] == '-') {
-                                board[row][col] = currentPlayer;
-                                validMove= true;
-                            }
-
                             board[row][col] = currentPlayer;
                             validMove= true;
                         }
@@ -213,10 +277,18 @@ public class TicTacToeRegular implements Serializable{
             }
         }
         else{
-            System.out.println("Engine turns.");
-            int[] enginemove = engine.getMove(board);
-            row  = enginemove[0];
-            col = enginemove[1];
+
+            if(isHuman){
+                int[] newMove = getMoveSecondPlayer();
+                row = newMove[0];
+                col = newMove[1];
+
+            }else{
+                System.out.println("Engine turns.");
+                int[] enginemove = engine.getMove(board);
+                row  = enginemove[0];
+                col = enginemove[1];
+            }
         }
         historyMoveRow.push(row);
         historyMoveCol.push(col);
@@ -224,6 +296,37 @@ public class TicTacToeRegular implements Serializable{
         return move;
     }
 
+    private int[] getMoveSecondPlayer(){
+        Scanner scanner = new Scanner(System.in);
+        int row = -1;
+        int col = -1;
+        boolean validMove = false;
+
+        while (!validMove) {
+            try {
+
+                System.out.print("Second player, enter your move (row[1-5] column[1-5]): ");
+                row = scanner.nextInt() - 1;
+                col = scanner.nextInt() - 1;
+
+                if (row >= 0 && row < 5 && col >= 0 && col < 5) {
+                    if (board[row][col] != '-') {
+                        System.out.println("Invalid move: cell is already occupied");
+                    } else {
+                        board[row][col] = 'O';
+                        validMove= true;
+                    }
+                } else {
+                    System.out.println("Invalid move: row and column must be between 1 and 3");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter integers.");
+                scanner.nextLine(); // consume the invalid input
+            }
+        }
+        int[] move = {row, col};
+        return move;
+    }
 
     private static char switchPlayer(char currentPlayer) {
         if (currentPlayer == player) {
@@ -399,5 +502,22 @@ public class TicTacToeRegular implements Serializable{
 
     public static char[][] getBoard() {
         return board;
+    }
+
+    public String getGameMode() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Choose game mode: ");
+        System.out.println("1. Player vs Player (PVP)");
+        System.out.println("2. Player vs Engine (PVE)");
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1:
+                return "PVP";
+            case 2:
+                return "PVE";
+            default:
+                System.out.println("Invalid choice, defaulting to PVE");
+                return "PVE";
+        }
     }
 }
