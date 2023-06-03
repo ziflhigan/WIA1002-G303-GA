@@ -29,6 +29,7 @@ public class BFSAllShortestPaths {
                 List<String> path = new ArrayList<>();
                 Node node = current;
                 while (node.parent != null) {
+                    // Calculate the distance from parent to child to identify its direction name
                     int dirRow = node.row - node.parent.row;
                     int dirCol = node.col - node.parent.col;
                     for (int i = 0; i < DIRECTIONS.length; i++) {

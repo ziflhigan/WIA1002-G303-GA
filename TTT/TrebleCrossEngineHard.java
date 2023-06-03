@@ -33,7 +33,6 @@ public class TrebleCrossEngineHard implements Engine{
             }
         }
 
-
         // If there's no optimal move, make the first available move
         for (int i = 0; i < 9; i++) {
             if (board[i] == '-') {

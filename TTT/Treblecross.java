@@ -1,8 +1,6 @@
 /**
- *
  * @author Xiu Huan
  */
-
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -24,7 +22,6 @@ public class Treblecross {
     private static Stack<Integer> moveHistory = new Stack<>();
     private static PlayerAccount playerAccount;
     private Engine engine;
-    private Engine SecondEngine;
 
     public Treblecross(PlayerAccount playerAccount) {
         this.playerAccount = playerAccount;
@@ -43,6 +40,7 @@ public class Treblecross {
     public boolean playPVE(){
         Random rd = new Random();
         int engNum = rd.nextInt(3);
+        printInstructions();
 
         if (engNum == 0){
             this.engine = new TrebleCrossEngineEasy();
@@ -57,15 +55,14 @@ public class Treblecross {
             System.out.println("The engine's difficulty is hard, try your best! ");
         }
 
-        printInstructions();
+
         String currentPlayer = playerAccount.getUsername();
 
         initializeBoard();
         numMoves =0;
         System.out.println("\nRound " + round);
-        boolean endRound = false;
 
-        while (!endRound) {
+        while (true) {
 
             double[] probabilities = getWinProbability(currentPlayer);
             System.out.println("Player's win probability: " + probabilities[0] * 100 + "%");
@@ -96,6 +93,8 @@ public class Treblecross {
                 moveHistory.clear();
                 return !currentPlayer.equals("Engine");
             }
+
+            // This should never happen
             else if(numMoves ==9){
                 System.out.println("It's a draw!");
                 System.out.println(playerAccount.getUsername()+"\t:\tEngine");
@@ -108,7 +107,6 @@ public class Treblecross {
             }
         }
 
-        return false;
     }
 
     public boolean playPVP() {
