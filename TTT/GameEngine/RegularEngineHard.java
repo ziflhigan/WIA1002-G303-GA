@@ -17,18 +17,6 @@ public class RegularEngineHard implements EngineInterface{
         return copy;
     }
 
-    private int countEmptyCells(char[][] board) {
-        int count = 0;
-        for (int row = 0; row < 5; row++) {
-            for (int col = 0; col < 5; col++) {
-                if (board[row][col] == '-') {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
     private int evaluateBoard(char[][] board) {
         int score = 0;
 
