@@ -17,6 +17,5 @@ public class TestWithTrebleCross {
         playerAccount.loadLeaderboard();
 
         Treblecross game = new Treblecross(playerAccount);
-        boolean win = game.playgame();
     }
 }

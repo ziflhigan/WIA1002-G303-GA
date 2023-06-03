@@ -382,7 +382,6 @@ public class Treblecross {
     public void loadGame(String fileName) {
         char[] tempBoard = new char[9];
 
-        boolean success = false;
         try (Scanner scanner = new Scanner(new FileReader("UserSaveGames\\" + fileName))) {
             String[] line = scanner.nextLine().split(" ");
             for (int i = 0; i < 9; i++) {

@@ -18,7 +18,6 @@ public class TestWithTTTRegular {
         playerAccount.loadLeaderboard();
 
         TicTacToeRegular game = new TicTacToeRegular(playerAccount);
-        boolean win = game.playgame();
     }
 
 }
