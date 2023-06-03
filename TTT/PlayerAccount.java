@@ -1,3 +1,4 @@
+
 /**
  * @Author Ikmal
  */
@@ -19,9 +20,8 @@ public class PlayerAccount implements Serializable {
         leaderboard = new ArrayList<>();
     }
 
-
-    public PlayerAccount(String name, String enteredPassword){
-        username=name;
+    public PlayerAccount(String name, String enteredPassword) {
+        username = name;
         password = enteredPassword;
     }
 
@@ -40,7 +40,8 @@ public class PlayerAccount implements Serializable {
         StringBuilder hexString = new StringBuilder(2 * hash.length);
         for (int i = 0; i < hash.length; i++) {
             String hex = Integer.toHexString(0xff & hash[i]);
-            if(hex.length() == 1) hexString.append('0');
+            if (hex.length() == 1)
+                hexString.append('0');
             hexString.append(hex);
         }
         return hexString.toString();
@@ -62,7 +63,7 @@ public class PlayerAccount implements Serializable {
         PlayerAccount.password = password;
     }
 
-    public static void createAccount() {
+    public void createAccount() {
         System.out.print("Username: ");
         username = in.next();
 
@@ -74,7 +75,31 @@ public class PlayerAccount implements Serializable {
         loadAccountSignup(username, password);
     }
 
-    public static void login() {
+    public static void createAccountStatic() {
+        System.out.print("Username: ");
+        username = in.next();
+
+        System.out.print("Password: ");
+        password = in.next();
+
+        password = hashPassword(password); // Hash the password
+
+        loadAccountSignup(username, password);
+    }
+
+    // non static method used in same class
+    public void login() {
+        System.out.print("Username: ");
+        String username = in.next();
+
+        System.out.print("Password: ");
+        String enteredPassword = in.next();
+
+        loadAccountLogin(username, enteredPassword); // Access account in the txt file
+    }
+
+    // static method used in same class
+    public static void loginStatic() {
         System.out.print("Username: ");
         String username = in.next();
 
@@ -85,7 +110,7 @@ public class PlayerAccount implements Serializable {
     }
 
     public static void saveAccount(String username, String password) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("player_account.txt",true))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("player_account.txt", true))) {
             writer.println(username);
             writer.println(password);
             System.out.println("Player account saved successfully!");
@@ -99,7 +124,7 @@ public class PlayerAccount implements Serializable {
 
         try {
 
-            if(!file.exists()) {
+            if (!file.exists()) {
                 file.createNewFile();
             }
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -118,7 +143,7 @@ public class PlayerAccount implements Serializable {
                 System.out.println("Account created successfully.");
                 saveAccount(enteredUsername, enteredPassword); // Save the account into txt file
                 System.out.println("Please Log In: ");
-                login();
+                loginStatic();
             } else {
                 System.out.println("The username has already been used by another account!");
                 System.out.println("1. Log in if it's your account.");
@@ -126,24 +151,25 @@ public class PlayerAccount implements Serializable {
                 System.out.print("Enter your choice: ");
                 int choice = in.nextInt();
                 if (choice == 1) {
-                    login();
+                    loginStatic();
                 } else if (choice == 2) {
-                    createAccount();
+                    createAccountStatic();
                 } else {
                     System.out.println("Invalid choice. Please try again.");
-                    createAccount();
+                    createAccountStatic();
                 }
             }
         } catch (IOException e) {
             System.out.println("Error loading the player account.");
         }
     }
+
     public static boolean loadAccountLogin(String username, String enteredPassword) {
 
         File file = new File("player_account.txt");
 
         try {
-            if(!file.exists()) {
+            if (!file.exists()) {
                 file.createNewFile();
             }
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -155,33 +181,32 @@ public class PlayerAccount implements Serializable {
                 PlayerAccount account = new PlayerAccount(name, password);
                 account.setUsername(name);
                 accounts.add(account);
-                if(account.getUsername().equals(username)) {
-                    if (account.getUsername().equals(username) && account.getPassword().equals(hashPassword(enteredPassword))) {
+                if (account.getUsername().equals(username)) {
+                    if (account.getUsername().equals(username)
+                            && account.getPassword().equals(hashPassword(enteredPassword))) {
                         System.out.println("Login successful!");
                         return true;
-                    }
-                    else if(account.getUsername().equals(username) && !password.equals(enteredPassword)) {
+                    } else if (account.getUsername().equals(username) && !password.equals(enteredPassword)) {
                         System.out.println("The username and/or password is invalid. Please try again.");
-                        login();
+                        loginStatic();
                         return true;
                     }
 
                 }
             }
 
-            while (true){
-                try{
+            while (true) {
+                try {
                     System.out.println("No username found. Do you wish to Sign up or Log in (0 : Sign up, 1 : Log in)");
                     int num = in.nextInt();
-                    if(num == 0) {
-                        createAccount();
+                    if (num == 0) {
+                        createAccountStatic();
+                        return false;
+                    } else if (num == 1) {
+                        loginStatic();
                         return false;
                     }
-                    else if(num == 1) {
-                        login();
-                        return false;
-                    }
-                }catch (NumberFormatException | InputMismatchException e){
+                } catch (NumberFormatException | InputMismatchException e) {
                     System.out.println("Please enter either 1 or 0 ! ");
                     in.nextLine();
                 }
@@ -189,7 +214,7 @@ public class PlayerAccount implements Serializable {
 
         } catch (IOException e) {
             System.out.println("Error loading the player account.");
-        } catch (InputMismatchException e){
+        } catch (InputMismatchException e) {
             System.out.println("Invalid input!");
         }
         return false;
@@ -224,7 +249,7 @@ public class PlayerAccount implements Serializable {
     }
 
     public void saveLeaderboard() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("playerLeaderboard.txt"),true)) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("playerLeaderboard.txt"), true)) {
             for (Player player : leaderboard) {
                 writer.println(player.getUsername());
                 writer.println(player.getScore());
@@ -235,7 +260,8 @@ public class PlayerAccount implements Serializable {
         }
     }
 
-    public static void loadLeaderboard() {
+    // used in same class
+    public void loadLeaderboard() {
         try (Scanner scanner = new Scanner(new FileReader("playerLeaderboard.txt"))) {
             while (scanner.hasNextLine()) {
                 String name = scanner.nextLine();
@@ -247,9 +273,10 @@ public class PlayerAccount implements Serializable {
             System.out.println("Error loading the leaderboard.");
         }
     }
+
 }
 
-class Player implements Serializable{
+class Player implements Serializable {
     private String username;
     private int score;
 
