@@ -16,6 +16,5 @@ public class TestWithTrebleCross {
         System.out.println();
         playerAccount.loadLeaderboard();
 
-        Treblecross game = new Treblecross(playerAccount);
     }
 }

@@ -17,8 +17,7 @@ public class TestWithTTTReverse {
         System.out.println();
         playerAccount.loadLeaderboard();
 
-        ReverseTicTacToe game = new ReverseTicTacToe(playerAccount);
-        boolean win = game.playgame();
+
     }
 
 }
