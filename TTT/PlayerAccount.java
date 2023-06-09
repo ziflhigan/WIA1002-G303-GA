@@ -148,17 +148,30 @@ public class PlayerAccount implements Serializable {
                 System.out.println("The username has already been used by another account!");
                 System.out.println("1. Log in if it's your account.");
                 System.out.println("2. Sign up using another username");
-                System.out.print("Enter your choice: ");
-                int choice = in.nextInt();
+
+                int choice = -1;
+                while (true) {
+                    System.out.print("Enter your choice: ");
+                    try {
+                        choice = in.nextInt();
+                        if (choice == 1 || choice == 2) {
+                            break;
+                        } else {
+                            System.out.println("Invalid choice. Please enter either 1 or 2.");
+                        }
+                    } catch (InputMismatchException e) {
+                        System.out.println("Invalid input! Please enter an integer.");
+                        in.nextLine();
+                    }
+                }
+
                 if (choice == 1) {
-                    loginStatic();
+                    login();
                 } else if (choice == 2) {
-                    createAccountStatic();
-                } else {
-                    System.out.println("Invalid choice. Please try again.");
-                    createAccountStatic();
+                    createAccount();
                 }
             }
+            
         } catch (IOException e) {
             System.out.println("Error loading the player account.");
         }
