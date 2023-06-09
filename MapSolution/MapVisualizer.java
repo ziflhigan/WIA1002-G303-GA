@@ -84,7 +84,8 @@ public class MapVisualizer {
         List<List<String>> allShortestPaths = BFSAllShortestPaths.findAllShortestPaths(comMap.completeMap());
 
         System.out.println("The minimum steps required for a shortest path is : " + allShortestPaths.get(0).size());
-        System.out.println("There are total " + allShortestPaths.size() + " possible shortest paths");
+        System.out.println("There are total " + allShortestPaths.size() + " possible shortest paths while " +
+                "passing through 4 stations");
         System.out.println("All possible shortest paths:");
         for (List<String> path : allShortestPaths) {
             System.out.println(path);
@@ -92,11 +93,10 @@ public class MapVisualizer {
 
         JFrame frame = new JFrame("Map Visualizer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(450, 850);
+        frame.setSize(420, 850);
         frame.setLocationRelativeTo(null);
         frame.setContentPane(new MapPanel(comMap.completeMap(), allShortestPaths));
         frame.setVisible(true);
 
-        System.out.println(allShortestPaths.size());
     }
 }

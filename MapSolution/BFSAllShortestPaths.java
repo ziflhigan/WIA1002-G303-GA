@@ -7,9 +7,11 @@ public class BFSAllShortestPaths {
     public static List<List<String>> findAllShortestPaths(int[][] map) {
         List<List<String>> shortestPaths = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
+
+        // We use hashset here because its lookup efficiency is just a constant time, better than ArrayList
         HashSet<String> initialVisited = new HashSet<>();
         initialVisited.add("0,0");
-        queue.offer(new Node(0, 0, 0, initialVisited, null));
+        queue.offer(new Node(0, 0, 0, initialVisited, null, 0));
 
         int shortestDistance = Integer.MAX_VALUE;
 
@@ -20,7 +22,16 @@ public class BFSAllShortestPaths {
                 continue;
             }
 
+            if (current.stationCount > 4){
+                continue;
+            }
+
+            if (map[current.row][current.col] == 2){
+                current.stationCount++;
+            }
+
             if (map[current.row][current.col] == 3) {
+
                 if (current.distance < shortestDistance) {
                     shortestPaths.clear();
                     shortestDistance = current.distance;
@@ -51,9 +62,14 @@ public class BFSAllShortestPaths {
                 String key = newRow + "," + newCol;
 
                 if (isValid(map, newRow, newCol) && !current.visited.contains(key)) {
+
                     HashSet<String> newVisited = new HashSet<>(current.visited);
                     newVisited.add(key);
-                    queue.offer(new Node(newRow, newCol, current.distance + 1, newVisited, current));
+
+                    // Copy the station count from the current node to the next node.
+                    int nextStationCount = current.stationCount;
+
+                    queue.offer(new Node(newRow, newCol, current.distance + 1, newVisited, current, nextStationCount));
                 }
             }
         }

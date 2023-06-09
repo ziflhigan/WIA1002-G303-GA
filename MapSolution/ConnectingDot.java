@@ -17,16 +17,15 @@ public class ConnectingDot {
         int currentRow = 0;
         int currentCol = 0;
         int numStation = 0;
+
         Stack<Integer> previousStationRows = new Stack<>();
         Stack<Integer> previousStationCols = new Stack<>();
-
-        Stack<String> pathToCurrentStation = new Stack<>();
 
         ListIterator<String> iter = path.listIterator();
 
         while(iter.hasNext()) {
             String direction = iter.next();
-            pathToCurrentStation.push(direction);
+
             switch (direction) {
                 case "Up":
                     currentRow--;
