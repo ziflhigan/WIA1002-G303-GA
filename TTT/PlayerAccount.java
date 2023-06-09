@@ -97,6 +97,8 @@ public class PlayerAccount implements Serializable {
     public static void loadAccountSignup(String enteredUsername, String enteredPassword) {
         File file = new File("player_account.txt");
 
+        boolean success = false;
+
         try {
 
             if(!file.exists()) {
@@ -123,17 +125,30 @@ public class PlayerAccount implements Serializable {
                 System.out.println("The username has already been used by another account!");
                 System.out.println("1. Log in if it's your account.");
                 System.out.println("2. Sign up using another username");
-                System.out.print("Enter your choice: ");
-                int choice = in.nextInt();
+
+                int choice = -1;
+                while (true) {
+                    System.out.print("Enter your choice: ");
+                    try {
+                        choice = in.nextInt();
+                        if (choice == 1 || choice == 2) {
+                            break;
+                        } else {
+                            System.out.println("Invalid choice. Please enter either 1 or 2.");
+                        }
+                    } catch (InputMismatchException e) {
+                        System.out.println("Invalid input! Please enter an integer.");
+                        in.nextLine();
+                    }
+                }
+
                 if (choice == 1) {
                     login();
                 } else if (choice == 2) {
                     createAccount();
-                } else {
-                    System.out.println("Invalid choice. Please try again.");
-                    createAccount();
                 }
             }
+
         } catch (IOException e) {
             System.out.println("Error loading the player account.");
         }
