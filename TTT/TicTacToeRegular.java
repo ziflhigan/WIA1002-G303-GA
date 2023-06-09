@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.InputMismatchException;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -44,16 +43,16 @@ public class TicTacToeRegular implements Serializable{
     }
 
     public boolean playPVE(){
-        Random rd = new Random();
-        int engNum = rd.nextInt(3);
+
+        String engNum=getDifficulty();
         printInstructions();
 
 
-        if (engNum == 0){
+        if (engNum.equals("0")) {
             engine = new RegularEngineEasy();
             System.out.println("You engine's difficulty is easy, you can do it!");
 
-        } else if (engNum == 1) {
+        } else if (engNum.equals("1")) {
             engine = new RegularEngineMedium();
             System.out.println("The engine's difficulty level is medium, good luck!");
 
@@ -518,6 +517,26 @@ public class TicTacToeRegular implements Serializable{
             default:
                 System.out.println("Invalid choice, defaulting to PVE");
                 return "PVE";
+        }
+    }
+
+    public String getDifficulty() {
+        Scanner scanner = new Scanner(System.in);
+        String difficulty = "";
+
+        System.out.println("Choose game difficulty: ");
+        System.out.println("0. Easy");
+        System.out.println("1. Medium");
+        System.out.println("Default: Hard");
+
+        difficulty = scanner.nextLine();
+        switch (difficulty) {
+            case "0":
+                return "0";
+            case "1":
+                return "1";
+            default:
+                return "hard";
         }
     }
 }
